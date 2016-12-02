@@ -1,0 +1,107 @@
+/*
+            .icons-sprite, .icons-chrome, .icons-edge, .icons-firefox, .icons-ie11, .icons-ie9, .icons-opera, .icons-safari {
+                background: url('../images/icons.png') no-repeat;
+            }
+            @mixin icons-chrome {
+                background-position: 0 0;
+            }
+            @mixin icons-edge {
+                background-position: -40px 0;
+            }
+            @mixin icons-firefox {
+                background-position: 0 -40px;
+            }
+            @mixin icons-ie11 {
+                background-position: -40px -40px;
+            }
+            @mixin icons-ie9 {
+                background-position: -80px 0;
+            }
+            @mixin icons-opera {
+                background-position: -80px -40px;
+            }
+            @mixin icons-safari {
+                background-position: 0 -80px;
+            }
+            @mixin icons-sprite($name) {
+                @if $name == 'chrome' {
+                    @include icons-chrome;
+                }
+                @else if $name == 'edge' {
+                    @include icons-edge;
+                }
+                @else if $name == 'firefox' {
+                    @include icons-firefox;
+                }
+                @else if $name == 'ie11' {
+                    @include icons-ie11;
+                }
+                @else if $name == 'ie9' {
+                    @include icons-ie9;
+                }
+                @else if $name == 'opera' {
+                    @include icons-opera;
+                }
+                @else if $name == 'safari' {
+                    @include icons-safari;
+                }
+            }
+            @mixin all-icons-sprites {
+                .icons-chrome {
+                    @include icons-chrome;
+                }
+                .icons-edge {
+                    @include icons-edge;
+                }
+                .icons-firefox {
+                    @include icons-firefox;
+                }
+                .icons-ie11 {
+                    @include icons-ie11;
+                }
+                .icons-ie9 {
+                    @include icons-ie9;
+                }
+                .icons-opera {
+                    @include icons-opera;
+                }
+                .icons-safari {
+                    @include icons-safari;
+                }
+            }
+*/
+.icons-sprite, .icons-chrome, .icons-edge, .icons-firefox, .icons-ie11, .icons-ie9, .icons-opera, .icons-safari {
+  background: url("../images/icons.png") no-repeat;
+}
+
+.icons-chrome {
+  background-position: 0 0;
+}
+
+.icons-edge {
+  background-position: -40px 0;
+}
+
+.icons-firefox {
+  background-position: 0 -40px;
+}
+
+.icons-ie11 {
+  background-position: -40px -40px;
+}
+
+.icons-ie9 {
+  background-position: -80px 0;
+}
+
+.icons-opera {
+  background-position: -80px -40px;
+}
+
+.icons-safari {
+  background-position: 0 -80px;
+}
+
+.foo {
+  background-position: 0 -80px;
+}

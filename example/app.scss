@@ -1,0 +1,6 @@
+@import "icons/*.png";
+@include all-icons-sprites;
+
+.foo {
+    @include icons-sprite(safari);
+}

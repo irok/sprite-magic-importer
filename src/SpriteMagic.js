@@ -140,6 +140,10 @@ export default class SpriteMagic {
     }
 
     contents() {
-        return this.context.mixins.join('');
+        let contents = this.context.mixins.join('');
+        if (this.options.debug) {
+            contents = `/*${contents}\n*/${contents}`;
+        }
+        return contents;
     }
 }
