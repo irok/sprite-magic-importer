@@ -8,11 +8,11 @@
   },
   "config": {
     "pre-git": {
-      "pre-commit": [
+      "pre-push": [
         "npm run lint"
       ],
       "post-checkout": [
-        "npm install"
+        "yarn"
       ]
     }
   },
