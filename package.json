@@ -1,0 +1,55 @@
+{
+  "name": "sprite-magic-importer",
+  "description": "Custom node-sass importer for create CSS Sprites like Magic Imports of the Comass.",
+  "version": "0.0.1",
+  "author": "irok",
+  "bugs": {
+    "url": "https://github.com/irok/sprite-magic-importer/issues"
+  },
+  "config": {
+    "pre-git": {
+      "pre-commit": [
+        "npm run lint"
+      ],
+      "post-checkout": [
+        "npm install"
+      ]
+    }
+  },
+  "dependencies": {
+    "fs-extra": "^1.0.0",
+    "glob": "^7.1.1",
+    "spritesmith": "^3.1.0"
+  },
+  "devDependencies": {
+    "babel-preset-latest": "^6.16.0",
+    "eslint": "^3.11.1",
+    "eslint-config-airbnb-base": "^10.0.1",
+    "eslint-plugin-import": "^2.2.0",
+    "node-sass": "^3.13.0",
+    "pre-git": "^3.11.1",
+    "rollup": "^0.36.4",
+    "rollup-plugin-babel": "^2.6.1"
+  },
+  "homepage": "https://github.com/irok/sprite-magic-importer#readme",
+  "keywords": [
+    "compass",
+    "css-sprites",
+    "importer",
+    "magic-imports",
+    "node-sass",
+    "sass"
+  ],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/irok/sprite-magic-importer.git"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "commit": "commit-wizard",
+    "lint": "eslint src || exit 0",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
