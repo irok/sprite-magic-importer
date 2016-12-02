@@ -1,3 +1,6 @@
 .eslintrc
 rollup.config.js
 test
+example
+*.lock
+*.url
