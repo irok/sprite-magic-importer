@@ -1,6 +1,8 @@
+.babelrc
 .eslintrc
-rollup.config.js
-test
-example
-*.lock
 *.url
+
+rollup.config.js
+
+example
+test
