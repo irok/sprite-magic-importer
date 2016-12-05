@@ -83,7 +83,7 @@ export default class SpriteMagic {
             }))
             .then(() => (
                 imagemin.buffer(this.context.imageData, {
-                    use: [ pngquant(this.options.pngquant) ]
+                    use: [pngquant(this.options.pngquant)]
                 })
             ))
             .then(buf => (this.context.imageData = buf))

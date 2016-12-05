@@ -2,6 +2,7 @@
 Custom node-sass importer for create CSS Sprites like Magic Imports of the Comass.
 
 ```scss
+/* Input */
 @import "icons/*.png";
 @include all-icons-sprites;
 ```
@@ -23,8 +24,10 @@ Custom node-sass importer for create CSS Sprites like Magic Imports of the Comas
 }
 ```
 
+See: [Example](https://github.com/irok/sprite-magic-importer/tree/master/example)
+
 ## Usage
-Create `importer.js`.
+Create `importer.js`
 
 ```js
 var spriteMagicImporter = require('sprite-magic-importer');
@@ -69,6 +72,7 @@ sass.render({
 ```js
 var gulp = require('gulp');
 var sass = require('gulp-sass');
+var importer = require('./importer');
 
 gulp.task('build:sass', function() {
     return gulp.src('path/to/sass')
@@ -83,7 +87,7 @@ gulp.task('build:sass', function() {
 
 ### CLI
 ```bash
-node-sass --importer ./importer.js -o htdocs/css src/app.scss
+node-sass --importer ./importer.js -o dist/css src/app.scss
 ```
 
 # License
