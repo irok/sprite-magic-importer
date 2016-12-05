@@ -8,7 +8,7 @@
   },
   "config": {
     "pre-git": {
-      "pre-push": [
+      "pre-commit": [
         "npm run lint"
       ],
       "post-checkout": [
@@ -53,7 +53,7 @@
     "build:all": "npm run build && npm run build:example",
     "build:example": "node-sass --importer example/importer.js --output-style expanded -o example/htdocs/css example/app.scss",
     "commit": "commit-wizard",
-    "lint": "eslint src || exit 0",
+    "lint": "eslint src",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }
