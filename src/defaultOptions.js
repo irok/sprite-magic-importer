@@ -4,6 +4,8 @@ export default {
     http_path:  '/',
     css_dir:    'stylesheets',
     images_dir: 'images',
+    spritesmith: {},
+    pngquant: {},
 
     get project_path() {
         return process.cwd();

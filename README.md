@@ -30,14 +30,26 @@ Create `importer.js`.
 var spriteMagicImporter = require('sprite-magic-importer');
 
 module.exports = spriteMagicImporter({
+    // http://compass-style.org/help/documentation/configuration-reference/
     images_dir:                 'src/images',
     generated_images_dir:       'htdocs/images',
     http_stylesheets_path:      'css',
-    http_generated_images_path: 'images'
+    http_generated_images_path: 'images',
+
+    // https://www.npmjs.com/package/spritesmith#spritesheetprocessimagesimages-options
+    spritesmith: {
+        padding: 10,
+        algorithm: 'diagonal'
+    },
+
+    // https://www.npmjs.com/package/imagemin-pngquant
+    pngquant: {
+        quality: 80,
+        speed: 10
+    }
+}
 });
 ```
-
-See: [Configuration Reference | Compass Documentation](http://compass-style.org/help/documentation/configuration-reference/)
 
 ### use with node-sass
 
@@ -73,3 +85,9 @@ gulp.task('build:sass', function() {
 ```bash
 node-sass --importer ./importer.js -o htdocs/css src/app.scss
 ```
+
+# License
+
+The MIT License (MIT)
+
+Copyright (c) 2016 Takayuki Irokawa

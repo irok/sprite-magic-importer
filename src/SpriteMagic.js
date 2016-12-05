@@ -2,6 +2,8 @@ import fs from 'fs-extra';
 import glob from 'glob';
 import path from 'path';
 import Spritesmith from 'spritesmith';
+import imagemin from 'imagemin';
+import pngquant from 'imagemin-pngquant';
 import defaultOptions from './defaultOptions';
 
 function cssValue(value, unit) {
@@ -50,9 +52,9 @@ export default class SpriteMagic {
     }
 
     runSpritesmith() {
-        const options = {
+        const options = Object.assign({}, this.options.spritesmith, {
             src: this.context.images.map(_ => _.filePath)
-        };
+        });
 
         return new Promise((resolve, reject) => {
             Spritesmith.run(options, (err, result) => {
@@ -79,6 +81,12 @@ export default class SpriteMagic {
                     err => (err ? reject(err) : resolve())
                 );
             }))
+            .then(() => (
+                imagemin.buffer(this.context.imageData, {
+                    use: [ pngquant(this.options.pngquant) ]
+                })
+            ))
+            .then(buf => (this.context.imageData = buf))
             .then(() => new Promise((resolve, reject) => {
                 fs.writeFile(this.context.imagePath, this.context.imageData,
                     err => (err ? reject(err) : resolve())

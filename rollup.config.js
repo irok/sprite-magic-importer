@@ -10,6 +10,8 @@ export default {
     external: [
         'fs-extra',
         'glob',
+        'imagemin',
+        'imagemin-pngquant',
         'path',
         'spritesmith'
     ]
