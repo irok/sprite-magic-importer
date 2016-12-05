@@ -41,8 +41,8 @@ module.exports = spriteMagicImporter({
 
     // https://www.npmjs.com/package/spritesmith#spritesheetprocessimagesimages-options
     spritesmith: {
-        padding: 10,
-        algorithm: 'diagonal'
+        padding: 10,            // instead of $<map>-spacing
+        algorithm: 'diagonal'   // instead of $<map>-layout
     },
 
     // https://www.npmjs.com/package/imagemin-pngquant

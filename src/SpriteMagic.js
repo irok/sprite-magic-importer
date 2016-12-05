@@ -96,28 +96,39 @@ export default class SpriteMagic {
 
     createMixins() {
         this.context.mixins = [];
+        const { selectors, pseudo } = this.getSelectorInfo();
 
         // sprite class
-        const selectors = [`.${this.context.mapName}-sprite`].concat(
-            this.context.images.map(image => `.${this.context.mapName}-${image.name}`)
-        );
+        const selector = [`.${this.context.mapName}-sprite`].concat(
+            selectors.map(image => `.${this.context.mapName}-${image.name}`)
+        ).join(', ');
         this.context.mixins.push(`
-            ${selectors.join(', ')} {
+            ${selector} {
                 background: url('${this.imagePath(this.context.fileName)}') no-repeat;
             }`
         );
 
         // create image mixins
-        this.context.mixins.push(...this.context.images.map(image => `
+        function createPseudoMixin(image) {
+            return !pseudo[image.name] ? '' : ['active', 'hover', 'target'].map(pseudoClass => {
+                const pseudoImage = pseudo[image.name][pseudoClass];
+                return !pseudoImage ? '' : `
+                &:${pseudoClass}, &.${image.name}_${pseudoClass}, &.${image.name}-${pseudoClass} {
+                    background-position: ${cssValue(-pseudoImage.x, 'px')} ${cssValue(-pseudoImage.y, 'px')};
+                }`;
+            }).join('');
+        }
+        this.context.mixins.push(...selectors.map(image => [`
             @mixin ${this.context.mapName}-${image.name} {
-                background-position: ${cssValue(-image.x, 'px')} ${cssValue(-image.y, 'px')};
+                background-position: ${cssValue(-image.x, 'px')} ${cssValue(-image.y, 'px')};`,
+            createPseudoMixin(image), `
             }`
-        ));
+        ].join('')));
 
         // add sprite mixin
         this.context.mixins.push(`
             @mixin ${this.context.mapName}-sprite($name) {${
-            this.context.images.map((image, index) => `
+            selectors.map((image, index) => `
                 ${index === 0 ? '@if' : '@else if'} $name == '${image.name}' {
                     @include ${this.context.mapName}-${image.name};
                 }`
@@ -128,13 +139,33 @@ export default class SpriteMagic {
         // add all sprites mixin
         this.context.mixins.push(`
             @mixin all-${this.context.mapName}-sprites {${
-            this.context.images.map(image => `
+            selectors.map(image => `
                 .${this.context.mapName}-${image.name} {
                     @include ${this.context.mapName}-${image.name};
                 }`
             ).join('')}
             }`
         );
+    }
+
+    getSelectorInfo() {
+        const selectors = [];
+        const pseudo = {};
+
+        this.context.images.forEach(image => {
+            if (/(.+)[-_](active|hover|target)$/.test(image.name)) {
+                const imageName = RegExp.$1;
+                const pseudoClass = RegExp.$2;
+                if (!pseudo[imageName]) {
+                    pseudo[imageName] = {};
+                }
+                pseudo[imageName][pseudoClass] = image;
+            } else {
+                selectors.push(image);
+            }
+        });
+
+        return { selectors, pseudo };
     }
 
     imagePath(fileName) {
