@@ -153,7 +153,7 @@ export default class SpriteMagic {
         const pseudo = {};
 
         this.context.images.forEach(image => {
-            if (/(.+)[-_](active|hover|target)$/.test(image.name)) {
+            if (/(.+[^-_])[-_](active|hover|target)$/.test(image.name)) {
                 const imageName = RegExp.$1;
                 const pseudoClass = RegExp.$2;
                 if (!pseudo[imageName]) {

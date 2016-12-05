@@ -1,30 +1,39 @@
 /*
-            .icons-sprite, .icons-chrome, .icons-edge, .icons-firefox, .icons-ie11, .icons-ie9, .icons-opera, .icons-safari {
+            .icons-sprite, .icons-chrome--hover, .icons-chrome, .icons-edge, .icons-firefox, .icons-ie11, .icons-ie9, .icons-opera, .icons-safari {
                 background: url('../images/icons.png') no-repeat;
             }
-            @mixin icons-chrome {
+            @mixin icons-chrome--hover {
                 background-position: 0 0;
             }
-            @mixin icons-edge {
+            @mixin icons-chrome {
                 background-position: -40px 0;
             }
-            @mixin icons-firefox {
-                background-position: 0 -40px;
-            }
-            @mixin icons-ie11 {
+            @mixin icons-edge {
                 background-position: -40px -40px;
+                &:hover, &.edge_hover, &.edge-hover {
+                    background-position: 0 -40px;
+                }
             }
-            @mixin icons-ie9 {
+            @mixin icons-firefox {
                 background-position: -80px 0;
             }
-            @mixin icons-opera {
+            @mixin icons-ie11 {
                 background-position: -80px -40px;
             }
-            @mixin icons-safari {
+            @mixin icons-ie9 {
                 background-position: 0 -80px;
             }
+            @mixin icons-opera {
+                background-position: -40px -80px;
+            }
+            @mixin icons-safari {
+                background-position: -80px -80px;
+            }
             @mixin icons-sprite($name) {
-                @if $name == 'chrome' {
+                @if $name == 'chrome--hover' {
+                    @include icons-chrome--hover;
+                }
+                @else if $name == 'chrome' {
                     @include icons-chrome;
                 }
                 @else if $name == 'edge' {
@@ -47,6 +56,9 @@
                 }
             }
             @mixin all-icons-sprites {
+                .icons-chrome--hover {
+                    @include icons-chrome--hover;
+                }
                 .icons-chrome {
                     @include icons-chrome;
                 }
@@ -70,38 +82,46 @@
                 }
             }
 */
-.icons-sprite, .icons-chrome, .icons-edge, .icons-firefox, .icons-ie11, .icons-ie9, .icons-opera, .icons-safari {
+.icons-sprite, .icons-chrome--hover, .icons-chrome, .icons-edge, .icons-firefox, .icons-ie11, .icons-ie9, .icons-opera, .icons-safari {
   background: url("../images/icons.png") no-repeat;
 }
 
-.icons-chrome {
+.icons-chrome--hover {
   background-position: 0 0;
 }
 
-.icons-edge {
+.icons-chrome {
   background-position: -40px 0;
 }
 
-.icons-firefox {
-  background-position: 0 -40px;
-}
-
-.icons-ie11 {
+.icons-edge {
   background-position: -40px -40px;
 }
 
-.icons-ie9 {
+.icons-edge:hover, .icons-edge.edge_hover, .icons-edge.edge-hover {
+  background-position: 0 -40px;
+}
+
+.icons-firefox {
   background-position: -80px 0;
 }
 
-.icons-opera {
+.icons-ie11 {
   background-position: -80px -40px;
 }
 
-.icons-safari {
+.icons-ie9 {
   background-position: 0 -80px;
 }
 
+.icons-opera {
+  background-position: -40px -80px;
+}
+
+.icons-safari {
+  background-position: -80px -80px;
+}
+
 .foo {
-  background-position: 0 -80px;
+  background-position: -80px -80px;
 }
