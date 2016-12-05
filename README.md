@@ -26,6 +26,12 @@ Custom node-sass importer for create CSS Sprites like Magic Imports of the Comas
 
 See: [Example](https://github.com/irok/sprite-magic-importer/tree/master/example)
 
+### generate mixins
+* `@mixin all-<map>-sprites`
+* `@mixin <map>-<sprite>`
+    * support [Magic Selectors](http://compass-style.org/help/tutorials/spriting/magic-selectors/)
+* `@mixin <map>-sprite(<sprite>)`
+
 ## Usage
 Create `importer.js`
 
