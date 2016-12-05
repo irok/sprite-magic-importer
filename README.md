@@ -37,6 +37,10 @@ module.exports = spriteMagicImporter({
 });
 ```
 
+See: [Configuration Reference | Compass Documentation](http://compass-style.org/help/documentation/configuration-reference/)
+
+### use with node-sass
+
 ```js
 var sass = require('node-sass');
 var importer = require('./importer');
@@ -48,10 +52,24 @@ sass.render({
 });
 ```
 
-## Options
-See: [Configuration Reference | Compass Documentation](http://compass-style.org/help/documentation/configuration-reference/)
+### use with gulp-sass
 
-## CLI
+```js
+var gulp = require('gulp');
+var sass = require('gulp-sass');
+
+gulp.task('build:sass', function() {
+    return gulp.src('path/to/sass')
+        .pipe(sass({
+            ...
+            importer: importer
+            ...
+        }))
+        .pipe(gulp.dest('cssdir'));
+});
+```
+
+### CLI
 ```bash
 node-sass --importer ./importer.js -o htdocs/css src/app.scss
 ```
