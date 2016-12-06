@@ -1,52 +1,56 @@
 /*
-            .icons-sprite, .icons-chrome--hover, .icons-chrome, .icons-edge, .icons-firefox, .icons-ie11, .icons-ie9, .icons-opera, .icons-safari {
+            .icons-sprite, .icons-chrome, .icons-firefox, .icons-ie, .icons-opera, .icons-safari {
                 background: url('../images/icons.png') no-repeat;
-            }
-            @mixin icons-chrome--hover {
-                background-position: 0 0;
             }
             @mixin icons-chrome {
                 background-position: -40px 0;
-            }
-            @mixin icons-edge {
-                background-position: -40px -40px;
-                &:hover, &.edge_hover, &.edge-hover {
-                    background-position: 0 -40px;
+                width: 40px;
+                height: 40px;
+                &:hover, &.chrome_hover, &.chrome-hover {
+                    background-position: 0 0;
+                    width: 40px;
+                    height: 40px;
                 }
             }
             @mixin icons-firefox {
-                background-position: -80px 0;
+                background-position: -40px -40px;
+                width: 40px;
+                height: 40px;
+                &:hover, &.firefox_hover, &.firefox-hover {
+                    background-position: 0 -40px;
+                    width: 40px;
+                    height: 40px;
+                }
             }
-            @mixin icons-ie11 {
+            @mixin icons-ie {
                 background-position: -80px -40px;
-            }
-            @mixin icons-ie9 {
-                background-position: 0 -80px;
+                width: 40px;
+                height: 40px;
+                &:hover, &.ie_hover, &.ie-hover {
+                    background-position: -80px 0;
+                    width: 40px;
+                    height: 40px;
+                }
             }
             @mixin icons-opera {
-                background-position: -40px -80px;
+                background-position: 0 -80px;
+                width: 40px;
+                height: 40px;
             }
             @mixin icons-safari {
-                background-position: -80px -80px;
+                background-position: -40px -80px;
+                width: 40px;
+                height: 40px;
             }
             @mixin icons-sprite($name) {
-                @if $name == 'chrome--hover' {
-                    @include icons-chrome--hover;
-                }
-                @else if $name == 'chrome' {
+                @if $name == 'chrome' {
                     @include icons-chrome;
-                }
-                @else if $name == 'edge' {
-                    @include icons-edge;
                 }
                 @else if $name == 'firefox' {
                     @include icons-firefox;
                 }
-                @else if $name == 'ie11' {
-                    @include icons-ie11;
-                }
-                @else if $name == 'ie9' {
-                    @include icons-ie9;
+                @else if $name == 'ie' {
+                    @include icons-ie;
                 }
                 @else if $name == 'opera' {
                     @include icons-opera;
@@ -56,23 +60,14 @@
                 }
             }
             @mixin all-icons-sprites {
-                .icons-chrome--hover {
-                    @include icons-chrome--hover;
-                }
                 .icons-chrome {
                     @include icons-chrome;
-                }
-                .icons-edge {
-                    @include icons-edge;
                 }
                 .icons-firefox {
                     @include icons-firefox;
                 }
-                .icons-ie11 {
-                    @include icons-ie11;
-                }
-                .icons-ie9 {
-                    @include icons-ie9;
+                .icons-ie {
+                    @include icons-ie;
                 }
                 .icons-opera {
                     @include icons-opera;
@@ -82,46 +77,60 @@
                 }
             }
 */
-.icons-sprite, .icons-chrome--hover, .icons-chrome, .icons-edge, .icons-firefox, .icons-ie11, .icons-ie9, .icons-opera, .icons-safari {
+.icons-sprite, .icons-chrome, .icons-firefox, .icons-ie, .icons-opera, .icons-safari {
   background: url("../images/icons.png") no-repeat;
-}
-
-.icons-chrome--hover {
-  background-position: 0 0;
 }
 
 .icons-chrome {
   background-position: -40px 0;
+  width: 40px;
+  height: 40px;
 }
 
-.icons-edge {
-  background-position: -40px -40px;
-}
-
-.icons-edge:hover, .icons-edge.edge_hover, .icons-edge.edge-hover {
-  background-position: 0 -40px;
+.icons-chrome:hover, .icons-chrome.chrome_hover, .icons-chrome.chrome-hover {
+  background-position: 0 0;
+  width: 40px;
+  height: 40px;
 }
 
 .icons-firefox {
-  background-position: -80px 0;
+  background-position: -40px -40px;
+  width: 40px;
+  height: 40px;
 }
 
-.icons-ie11 {
+.icons-firefox:hover, .icons-firefox.firefox_hover, .icons-firefox.firefox-hover {
+  background-position: 0 -40px;
+  width: 40px;
+  height: 40px;
+}
+
+.icons-ie {
   background-position: -80px -40px;
+  width: 40px;
+  height: 40px;
 }
 
-.icons-ie9 {
-  background-position: 0 -80px;
+.icons-ie:hover, .icons-ie.ie_hover, .icons-ie.ie-hover {
+  background-position: -80px 0;
+  width: 40px;
+  height: 40px;
 }
 
 .icons-opera {
-  background-position: -40px -80px;
+  background-position: 0 -80px;
+  width: 40px;
+  height: 40px;
 }
 
 .icons-safari {
-  background-position: -80px -80px;
+  background-position: -40px -80px;
+  width: 40px;
+  height: 40px;
 }
 
 .foo {
-  background-position: -80px -80px;
+  background-position: -40px -80px;
+  width: 40px;
+  height: 40px;
 }
