@@ -1,15 +1,33 @@
 import path from 'path';
 
+function getClassSeparator({ options: { vars } }) {
+    return vars['$default-sprite-separator'];
+}
+
+function getSpriteBaseClass({ context: { mapName }, options: { vars } }) {
+    const sep = vars[`$${mapName}-class-separator`] ||
+                vars['$default-sprite-separator'];
+    return `.${mapName}${sep}sprite`;
+}
+
 export default {
-    http_path:  '/',
-    css_dir:    'stylesheets',
+    project_path: process.cwd(),
+    http_path: '/',
+    css_dir: 'stylesheets',
     images_dir: 'images',
-    spritesmith: {},
+    vars: {},
+    _default_vars: {
+        '$default-sprite-separator': '-'
+    },
+    _default_map_sprite: {
+        layout: () => 'binary-tree',
+        spacing: () => 0,
+        'sprite-dimensions': () => false,
+        'sprite-base-class': getSpriteBaseClass,
+        'class-separator': getClassSeparator
+    },
     pngquant: {},
 
-    get project_path() {
-        return process.cwd();
-    },
     get css_path() {
         return path.join(this.project_path, this.css_dir);
     },

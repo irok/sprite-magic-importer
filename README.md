@@ -9,7 +9,7 @@ Custom node-sass importer for create CSS Sprites like Magic Imports of the Compa
 
 ```css
 /* Result */
-.icons-sprite, .icons-chrome, .icons-edge, .icons-firefox, .icons-ie11, .icons-ie9, .icons-opera, .icons-safari {
+.icons-sprite, .icons-chrome, ...snip..., .icons-safari {
   background: url("../images/icons.png") no-repeat;
 }
 
@@ -26,11 +26,23 @@ Custom node-sass importer for create CSS Sprites like Magic Imports of the Compa
 
 See: [Example](https://github.com/irok/sprite-magic-importer/tree/master/example)
 
-### generate mixins
-* `@mixin all-<map>-sprites`
-* `@mixin <map>-<sprite>`
-    * support [Magic Selectors](http://compass-style.org/help/tutorials/spriting/magic-selectors/)
-* `@mixin <map>-sprite(<sprite>)`
+## Supported features
+* `all-<map>-sprites`
+* `<map>-sprite()`
+* `<map>-<sprite>`
+* [Magic Selectors](http://compass-style.org/help/tutorials/spriting/magic-selectors/)
+* `$<map>-layout`
+    * default: `binary-tree` (specify the value of spritesmith's algorithm option)
+* `$<map>-spacing`
+    * default: `0` (specify no units)
+* `$<map>-sprite-dimensions`
+    * default: `false`
+* `$<map>-sprite-base-class`
+    * default: `.<map>-sprite`
+* `$<map>-class-separator`
+    * default: `$default-sprite-separator`
+* `$default-sprite-separator`
+    * default: `-`
 
 ## Usage
 Create `importer.js`
@@ -45,21 +57,25 @@ module.exports = spriteMagicImporter({
     http_stylesheets_path:      'css',
     http_generated_images_path: 'images',
 
-    // https://www.npmjs.com/package/spritesmith#spritesheetprocessimagesimages-options
-    spritesmith: {
-        padding: 10,            // instead of $<map>-spacing
-        algorithm: 'diagonal'   // instead of $<map>-layout
+    // configuration variables
+    vars: {
+        '$default-sprite-separator': '_',
+
+        // for icons/*.png
+        '$icons-layout': 'diagonal',
+        '$icons-spacing': 0,
+        '$icons-sprite-dimensions': true,
+        '$icons-sprite-base-class': '.list',
+        '$icons-class-separator': '-'
     },
 
-    // https://www.npmjs.com/package/imagemin-pngquant
+    // imagemin-pngquant options
     pngquant: {
-        quality: 80,
+        quality: 75,
         speed: 10
     }
 });
 ```
-
-### use with node-sass
 
 ```js
 var sass = require('node-sass');
@@ -69,24 +85,6 @@ sass.render({
     ...
     importer: importer
     ...
-});
-```
-
-### use with gulp-sass
-
-```js
-var gulp = require('gulp');
-var sass = require('gulp-sass');
-var importer = require('./importer');
-
-gulp.task('build:sass', function() {
-    return gulp.src('path/to/sass')
-        .pipe(sass({
-            ...
-            importer: importer
-            ...
-        }))
-        .pipe(gulp.dest('cssdir'));
 });
 ```
 
