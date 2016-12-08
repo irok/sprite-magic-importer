@@ -7,5 +7,11 @@ module.exports = configure({
     images_dir:                 'example/images',
     generated_images_dir:       'example/htdocs/images',
     http_stylesheets_path:      'css',
-    http_generated_images_path: 'images'
+    http_generated_images_path: 'images',
+
+    vars: {
+        '$default-sprite-separator': '_',
+        '$icons-sprite-dimensions': true,
+        '$icons-class-separator': '-'
+    }
 });

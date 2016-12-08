@@ -1,8 +1,9 @@
 /*
-.icons-sprite, .icons-chrome, .icons-firefox, .icons-ie, .icons-opera, .icons-safari {
+.icons-sprite {
     background: url('../images/icons.png') no-repeat;
 }
 @mixin icons-chrome {
+    @extend .icons-sprite;
     background-position: -40px 0;
     width: 40px;
     height: 40px;
@@ -13,6 +14,7 @@
     }
 }
 @mixin icons-firefox {
+    @extend .icons-sprite;
     background-position: -40px -40px;
     width: 40px;
     height: 40px;
@@ -23,6 +25,7 @@
     }
 }
 @mixin icons-ie {
+    @extend .icons-sprite;
     background-position: -80px -40px;
     width: 40px;
     height: 40px;
@@ -33,11 +36,13 @@
     }
 }
 @mixin icons-opera {
+    @extend .icons-sprite;
     background-position: 0 -80px;
     width: 40px;
     height: 40px;
 }
 @mixin icons-safari {
+    @extend .icons-sprite;
     background-position: -40px -80px;
     width: 40px;
     height: 40px;
@@ -77,7 +82,7 @@
     }
 }
 */
-.icons-sprite, .icons-chrome, .icons-firefox, .icons-ie, .icons-opera, .icons-safari {
+.icons-sprite, .icons-chrome, .icons-firefox, .icons-ie, .icons-opera, .icons-safari, .foo {
   background: url("../images/icons.png") no-repeat;
 }
 
