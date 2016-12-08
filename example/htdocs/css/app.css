@@ -1,81 +1,81 @@
 /*
-            .icons-sprite, .icons-chrome, .icons-firefox, .icons-ie, .icons-opera, .icons-safari {
-                background: url('../images/icons.png') no-repeat;
-            }
-            @mixin icons-chrome {
-                background-position: -40px 0;
-                width: 40px;
-                height: 40px;
-                &:hover, &.chrome_hover, &.chrome-hover {
-                    background-position: 0 0;
-                    width: 40px;
-                    height: 40px;
-                }
-            }
-            @mixin icons-firefox {
-                background-position: -40px -40px;
-                width: 40px;
-                height: 40px;
-                &:hover, &.firefox_hover, &.firefox-hover {
-                    background-position: 0 -40px;
-                    width: 40px;
-                    height: 40px;
-                }
-            }
-            @mixin icons-ie {
-                background-position: -80px -40px;
-                width: 40px;
-                height: 40px;
-                &:hover, &.ie_hover, &.ie-hover {
-                    background-position: -80px 0;
-                    width: 40px;
-                    height: 40px;
-                }
-            }
-            @mixin icons-opera {
-                background-position: 0 -80px;
-                width: 40px;
-                height: 40px;
-            }
-            @mixin icons-safari {
-                background-position: -40px -80px;
-                width: 40px;
-                height: 40px;
-            }
-            @mixin icons-sprite($name) {
-                @if $name == 'chrome' {
-                    @include icons-chrome;
-                }
-                @else if $name == 'firefox' {
-                    @include icons-firefox;
-                }
-                @else if $name == 'ie' {
-                    @include icons-ie;
-                }
-                @else if $name == 'opera' {
-                    @include icons-opera;
-                }
-                @else if $name == 'safari' {
-                    @include icons-safari;
-                }
-            }
-            @mixin all-icons-sprites {
-                .icons-chrome {
-                    @include icons-chrome;
-                }
-                .icons-firefox {
-                    @include icons-firefox;
-                }
-                .icons-ie {
-                    @include icons-ie;
-                }
-                .icons-opera {
-                    @include icons-opera;
-                }
-                .icons-safari {
-                    @include icons-safari;
-                }
-            }
+.icons-sprite, .icons-chrome, .icons-firefox, .icons-ie, .icons-opera, .icons-safari {
+    background: url('../images/icons.png') no-repeat;
+}
+@mixin icons-chrome {
+    background-position: -40px 0;
+    width: 40px;
+    height: 40px;
+    &:hover, &.chrome_hover, &.chrome-hover {
+        background-position: 0 0;
+        width: 40px;
+        height: 40px;
+    }
+}
+@mixin icons-firefox {
+    background-position: -40px -40px;
+    width: 40px;
+    height: 40px;
+    &:hover, &.firefox_hover, &.firefox-hover {
+        background-position: 0 -40px;
+        width: 40px;
+        height: 40px;
+    }
+}
+@mixin icons-ie {
+    background-position: -80px -40px;
+    width: 40px;
+    height: 40px;
+    &:hover, &.ie_hover, &.ie-hover {
+        background-position: -80px 0;
+        width: 40px;
+        height: 40px;
+    }
+}
+@mixin icons-opera {
+    background-position: 0 -80px;
+    width: 40px;
+    height: 40px;
+}
+@mixin icons-safari {
+    background-position: -40px -80px;
+    width: 40px;
+    height: 40px;
+}
+@mixin icons-sprite($name) {
+    @if $name == 'chrome' {
+        @include icons-chrome;
+    }
+    @else if $name == 'firefox' {
+        @include icons-firefox;
+    }
+    @else if $name == 'ie' {
+        @include icons-ie;
+    }
+    @else if $name == 'opera' {
+        @include icons-opera;
+    }
+    @else if $name == 'safari' {
+        @include icons-safari;
+    }
+}
+@mixin all-icons-sprites {
+    .icons-chrome {
+        @include icons-chrome;
+    }
+    .icons-firefox {
+        @include icons-firefox;
+    }
+    .icons-ie {
+        @include icons-ie;
+    }
+    .icons-opera {
+        @include icons-opera;
+    }
+    .icons-safari {
+        @include icons-safari;
+    }
+}
 */
 .icons-sprite, .icons-chrome, .icons-firefox, .icons-ie, .icons-opera, .icons-safari {
   background: url("../images/icons.png") no-repeat;

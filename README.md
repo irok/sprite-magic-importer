@@ -56,7 +56,6 @@ module.exports = spriteMagicImporter({
         quality: 80,
         speed: 10
     }
-}
 });
 ```
 

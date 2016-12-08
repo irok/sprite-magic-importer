@@ -1,4 +1,5 @@
 import babel from 'rollup-plugin-babel';
+const { dependencies } = require('./package.json');
 
 export default {
     entry: 'src/index.js',
@@ -7,12 +8,7 @@ export default {
     plugins: [
         babel()
     ],
-    external: [
-        'fs-extra',
-        'glob',
-        'imagemin',
-        'imagemin-pngquant',
-        'path',
-        'spritesmith'
-    ]
+    external: Object.keys(dependencies).concat([
+        'path'
+    ])
 };
