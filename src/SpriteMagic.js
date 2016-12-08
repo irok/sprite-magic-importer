@@ -35,7 +35,7 @@ export default class SpriteMagic {
 
     getImagesInfo() {
         this.context.srcPath = path.resolve(this.options.images_dir, this.context.url);
-        this.context.mapName = path.dirname(this.context.srcPath).split(path.sep).reverse()[0];
+        this.context.mapName = path.basename(path.dirname(this.context.srcPath));
 
         return new Promise((resolve, reject) => {
             glob(this.context.srcPath, (err, matches) => {
@@ -159,17 +159,12 @@ export default class SpriteMagic {
     }
 
     getSelectorInfo() {
-        const selectors = [];
-        const pseudo = {};
+        const [selectors, pseudo] = [[], {}];
 
         this.context.images.forEach(image => {
             if (/^(.*[^-_])[-_](active|hover|target)$/.test(image.name)) {
-                const imageName = RegExp.$1;
-                const pseudoClass = RegExp.$2;
-                if (!pseudo[imageName]) {
-                    pseudo[imageName] = {};
-                }
-                pseudo[imageName][pseudoClass] = image;
+                const { $1: imageName, $2: pseudoClass } = RegExp;
+                (pseudo[imageName] || (pseudo[imageName] = {}))[pseudoClass] = image;
             } else {
                 selectors.push(image);
             }
@@ -189,9 +184,10 @@ export default class SpriteMagic {
     }
 
     contents() {
-        let contents = this.context.mixins.join('');
+        // create contents and outdent
+        const contents = this.context.mixins.join('').replace(/^\x20{12}/mg, '');
         if (this.options.debug) {
-            contents = `/*${contents}\n*/${contents}`;
+            return `/*${contents}\n*/${contents}`;
         }
         return contents;
     }
