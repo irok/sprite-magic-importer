@@ -4,7 +4,7 @@ Custom node-sass importer for create CSS Sprites like Magic Imports of the Compa
 ```scss
 /* Input */
 @import "icons/*.png";
-@include all-icons-sprites;
+@include all-icons-sprites(true);
 ```
 
 ```css
@@ -15,12 +15,16 @@ Custom node-sass importer for create CSS Sprites like Magic Imports of the Compa
 
 .icons-chrome {
   background-position: 0 0;
+  width: 40px;
+  height: 40px;
 }
 
 ...snip...
 
 .icons-safari {
   background-position: 0 -80px;
+  width: 40px;
+  height: 40px;
 }
 ```
 
@@ -56,9 +60,9 @@ Supported are hover, target, active, and focus.
 Create `importer.js`
 
 ```js
-var spriteMagicImporter = require('sprite-magic-importer');
+var SpriteMagicImporter = require('sprite-magic-importer');
 
-module.exports = spriteMagicImporter({
+module.exports = SpriteMagicImporter({
     // http://compass-style.org/help/documentation/configuration-reference/
     images_dir:                 'src/images',
     generated_images_dir:       'htdocs/images',
