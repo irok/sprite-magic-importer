@@ -80,11 +80,6 @@ export default class SpriteMagic {
         this.context.imagePath = path.resolve(this.options.generated_images_dir, this.context.fileName);
 
         return Promise.resolve()
-            .then(() => new Promise((resolve, reject) => {
-                fs.mkdirs(path.dirname(this.context.imagePath),
-                    err => (err ? reject(err) : resolve())
-                );
-            }))
             .then(() => (
                 imagemin.buffer(this.context.imageData, {
                     use: [pngquant(this.options.pngquant)]
@@ -92,7 +87,7 @@ export default class SpriteMagic {
             ))
             .then(buf => (this.context.imageData = buf))
             .then(() => new Promise((resolve, reject) => {
-                fs.writeFile(this.context.imagePath, this.context.imageData,
+                fs.outputFile(this.context.imagePath, this.context.imageData,
                     err => (err ? reject(err) : resolve())
                 );
             }));
@@ -210,7 +205,7 @@ export default class SpriteMagic {
             }`
         );
 
-        this.context.contents = contents.map(_ => `${_}\n`).join('').replace(/^\x20{12}/mg, '');
+        this.context.contents = contents.map(_ => `${_}\n`).join('').replace(/^\x20{12}/mg, '').slice(1);
     }
 
     getSelectorInfo() {
@@ -241,22 +236,18 @@ export default class SpriteMagic {
 
     output() {
         const hash = CryptoJs.SHA1(this.context.contents).toString(CryptoJs.enc.HEX);
-        const tmpdir = path.resolve(os.tmpdir(), 'sprite-magic-importer');
-        const tmpfile = path.resolve(tmpdir, `${this.context.mapName}-${hash.substr(0, 7)}.scss`);
+        const fileName = `${this.context.mapName}-${hash.substr(0, 7)}.scss`;
+        const filePath = path.resolve(os.tmpdir(), 'sprite-magic-importer', fileName);
 
-        return Promise.resolve()
-            .then(() => new Promise((resolve, reject) => {
-                fs.mkdirs(tmpdir, err => (err ? reject(err) : resolve()));
-            }))
-            .then(() => new Promise((resolve, reject) => {
-                fs.outputFile(tmpfile, this.context.contents, err => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    // eslint-disable-next-line no-console
-                    console.log(`Create importer file: '${tmpfile}'`);
-                    return resolve({ file: tmpfile });
-                });
-            }));
+        return new Promise((resolve, reject) => {
+            fs.outputFile(filePath, this.context.contents, err => {
+                if (err) {
+                    return reject(err);
+                }
+                // eslint-disable-next-line no-console
+                console.info(`Create importer file: '${filePath}'`);
+                return resolve({ file: filePath });
+            });
+        });
     }
 }
