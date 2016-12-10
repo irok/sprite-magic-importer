@@ -27,22 +27,30 @@ Custom node-sass importer for create CSS Sprites like Magic Imports of the Compa
 See: [Example](https://github.com/irok/sprite-magic-importer/tree/master/example)
 
 ## Supported features
-* `all-<map>-sprites`
-* `<map>-sprite()`
-* `<map>-<sprite>`
-* [Magic Selectors](http://compass-style.org/help/tutorials/spriting/magic-selectors/)
-* `$<map>-layout`
-    * default: `binary-tree` (specify the value of spritesmith's algorithm option)
-* `$<map>-spacing`
-    * default: `0` (specify no units)
-* `$<map>-sprite-dimensions`
+
+### Mixins and Functions
+* `@mixin all-<map>-sprites()`
+* `@mixin <map>-sprite()`
+* `@mixin <map>-sprite-dimensions()`
+* `@function <map>-sprite-width()`
+* `@function <map>-sprite-height()`
+
+### [Magic Selectors](http://compass-style.org/help/tutorials/spriting/magic-selectors/)
+Supported are hover, target, active, and focus.
+
+### Customization Options
+* `$disable-magic-sprite-selectors`
     * default: `false`
-* `$<map>-sprite-base-class`
-    * default: `.<map>-sprite`
-* `$<map>-class-separator`
-    * default: `$default-sprite-separator`
+* `$sprite-selectors`
+    * default: `hover, target, active, focus`
 * `$default-sprite-separator`
     * default: `-`
+* `$<map>-sprite-base-class`
+    * default: `.<map>-sprite`
+* `$<map>-sprite-dimensions`
+    * default: `false`
+* `$<map>-class-separator`
+    * default: `$default-sprite-separator`
 
 ## Usage
 Create `importer.js`
@@ -57,16 +65,10 @@ module.exports = spriteMagicImporter({
     http_stylesheets_path:      'css',
     http_generated_images_path: 'images',
 
-    // configuration variables
-    vars: {
-        '$default-sprite-separator': '_',
-
-        // for icons/*.png
-        '$icons-layout': 'diagonal',
-        '$icons-spacing': 0,
-        '$icons-sprite-dimensions': true,
-        '$icons-sprite-base-class': '.list',
-        '$icons-class-separator': '-'
+    // spritesmith options
+    spritesmith: {
+        algorithm: `binary-tree`,
+        padding: 0
     },
 
     // imagemin-pngquant options

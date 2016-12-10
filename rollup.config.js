@@ -9,6 +9,6 @@ export default {
         babel()
     ],
     external: Object.keys(dependencies).concat([
-        'path'
+        'os', 'path'
     ])
 };

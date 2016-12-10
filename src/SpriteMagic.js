@@ -1,13 +1,17 @@
 import fs from 'fs-extra';
 import glob from 'glob';
+import os from 'os';
 import path from 'path';
 import Spritesmith from 'spritesmith';
 import imagemin from 'imagemin';
 import pngquant from 'imagemin-pngquant';
+import CryptoJs from 'crypto-js';
 import defaultOptions from './defaultOptions';
 
-function cssValue(value, unit) {
-    return value === 0 ? '0' : `${value}${unit}`;
+const stateClasses = ['hover', 'target', 'active', 'focus'];
+
+function px(value) {
+    return value === 0 ? '0' : `${value}px`;
 }
 
 export default class SpriteMagic {
@@ -27,11 +31,10 @@ export default class SpriteMagic {
 
         return Promise.resolve()
             .then(() => this.getImagesInfo())
-            .then(() => this.setConfigVars())
             .then(() => this.runSpritesmith())
             .then(() => this.createSpriteImage())
-            .then(() => this.createMixins())
-            .then(() => ({ contents: this.contents() }));
+            .then(() => this.createContents())
+            .then(() => this.output());
     }
 
     getImagesInfo() {
@@ -52,26 +55,10 @@ export default class SpriteMagic {
         });
     }
 
-    setConfigVars() {
-        const { _default_vars, _default_map_sprite } = defaultOptions;
-        this.options.vars = Object.assign({}, _default_vars, this.options.vars);
-        this.context.vars = {};
-
-        // set map sprite vars to context
-        Object.keys(_default_map_sprite).forEach(key => {
-            const mapKey = `$${this.context.mapName}-${key}`;
-            this.context.vars[key] = typeof this.options.vars[mapKey] !== 'undefined'
-                ? this.options.vars[mapKey]
-                : _default_map_sprite[key](this);
-        });
-    }
-
     runSpritesmith() {
-        const options = {
-            algorithm: this.context.vars.layout,
-            padding: this.context.vars.spacing,
+        const options = Object.assign({}, this.options.spritesmith, {
             src: this.context.images.map(image => image.filePath)
-        };
+        });
 
         return new Promise((resolve, reject) => {
             Spritesmith.run(options, (err, result) => {
@@ -111,93 +98,135 @@ export default class SpriteMagic {
             }));
     }
 
-    createMixins() {
-        const { selectors, pseudo } = this.getSelectorInfo();
-        const {
-            mapName,
-            vars: {
-                'sprite-dimensions': hasDimensions,
-                'sprite-base-class': baseClass,
-                'class-separator': sep
-            }
-        } = this.context;
-        this.context.mixins = [];
+    createContents() {
+        const { selectors, pseudoMap } = this.getSelectorInfo();
+        const { mapName, fileName } = this.context;
+        const contents = [];
+
+        // variables
+        contents.push(`
+            $disable-magic-sprite-selectors: false !default;
+            $sprite-selectors: ${stateClasses.join(', ')} !default;
+            $default-sprite-separator: '-' !default;
+            $${mapName}-sprite-base-class: '.${mapName}-sprite' !default;
+            $${mapName}-sprite-dimensions: false !default;
+            $${mapName}-class-separator: $default-sprite-separator !default;`
+        );
 
         // sprite image class
-        this.context.mixins.push(`
-            ${baseClass} {
-                background: url('${this.imagePath(this.context.fileName)}') no-repeat;
+        contents.push(`
+            #{$${mapName}-sprite-base-class} {
+                background: url('${this.imagePath(fileName)}') no-repeat;
             }`
         );
 
-        // <map>-<sprite> mixins
-        const createPseudoClassMixins = ({ name }, cb) => (
-            !pseudo[name] ? '' : ['active', 'hover', 'target'].map(pseudoClass => (
-                !pseudo[name][pseudoClass] ? '' : cb(
-                    `&:${pseudoClass}, &.${name}_${pseudoClass}, &.${name}-${pseudoClass}`,
-                    pseudo[name][pseudoClass]
-                )
-            )).join('')
+        // sprites data
+        contents.push(`
+            $sprite-magic-${mapName}: (${
+            selectors.map(image => `
+                ${image.name}: (
+                    x: ${px(image.x)}, y: ${px(image.y)}, width: ${px(image.width)}, height: ${px(image.height)}${
+                stateClasses.map(state => (
+                    !pseudoMap[image.name] || !pseudoMap[image.name][state] ? '' :
+                    `, ${state}: (${
+                        ['x', 'y'].map(prop => `${prop}: ${px(pseudoMap[image.name][state][prop])}`).join(', ')
+                    })`
+                )).join('')}
+                )`
+            ).join(',')}
+            );`
         );
-        const createDimensions = (image, cb) => (hasDimensions ? cb(image) : '');
 
-        this.context.mixins.push(...selectors.map(image => `
-            @mixin ${mapName}-${image.name} {
-                @extend ${baseClass};
-                background-position: ${cssValue(-image.x, 'px')} ${cssValue(-image.y, 'px')};${
-            createDimensions(image, ({ width, height }) => `
-                width: ${width}px;
-                height: ${height}px;`
-            )}${
-            // eslint-disable-next-line no-shadow
-            createPseudoClassMixins(image, (selector, image) => `
-                ${selector} {
-                    background-position: ${cssValue(-image.x, 'px')} ${cssValue(-image.y, 'px')};${
-                createDimensions(image, ({ width, height }) => `
-                    width: ${width}px;
-                    height: ${height}px;`
-                )}
-                }`
-            )}
+        // width and height function
+        contents.push(...['width', 'height'].map(prop => `
+            @function ${mapName}-sprite-${prop}($sprite) {
+                @return map-get(map-get($sprite-magic-${mapName}, $sprite), '${prop}');
             }`
         ));
 
-        // <map>-sprite() mixin
-        this.context.mixins.push(`
-            @mixin ${mapName}-sprite($name) {${
-            selectors.map((image, index) => `
-                ${index === 0 ? '@if' : '@else if'} $name == '${image.name}' {
-                    @include ${mapName}-${image.name};
+        // dimensions mixin
+        contents.push(`
+            @mixin ${mapName}-sprite-dimensions($sprite) {
+                width: ${mapName}-sprite-width($sprite);
+                height: ${mapName}-sprite-height($sprite);
+            }`
+        );
+
+        // background position mixin
+        contents.push(`
+            @mixin sprite-magic-background-position($sprite-data, $offset-x: 0, $offset-y: 0) {
+                $x: $offset-x - map-get($sprite-data, 'x');
+                $y: $offset-y - map-get($sprite-data, 'y');
+                background-position: $x $y;
+            }`
+        );
+
+        // state selector
+        contents.push(`
+            @mixin ${mapName}-sprite-selectors(
+                $sprite-name, $full-sprite-name, $offset-x: 0, $offset-y: 0,
+                $unsupported: false, $separator: $${mapName}-class-separator
+            ) {
+                $sprite-data: map-get($sprite-magic-${mapName}, $sprite-name);
+                @each $state in $sprite-selectors {
+                    @if map-has-key($sprite-data, $state) {
+                        $sprite-class: "#{$full-sprite-name}#{$separator}#{$state}";
+                        &:#{$state}, &.#{$sprite-class} {
+                            @include sprite-magic-background-position(map-get($sprite-data, $state), $offset-x, $offset-y);
+                        }
+                    }
+                }
+            }`
+        );
+
+        // sprite mixin
+        contents.push(`
+            @mixin ${mapName}-sprite(
+                $sprite, $dimensions: $${mapName}-sprite-dimensions, $offset-x: 0, $offset-y: 0, $unsupported: false,
+                $use-magic-selectors: not $disable-magic-sprite-selectors, $separator: $${mapName}-class-separator
+            ) {
+                $sprite-data: map-get($sprite-magic-${mapName}, $sprite);
+                @extend #{$${mapName}-sprite-base-class};
+                @include sprite-magic-background-position($sprite-data, $offset-x, $offset-y);
+                @if $dimensions {
+                    @include ${mapName}-sprite-dimensions($sprite);
+                }
+                @if $use-magic-selectors {
+                    @include ${mapName}-sprite-selectors(
+                        $sprite, $sprite, $offset-x, $offset-y, $unsupported, $separator
+                    );
+                }
+            }`
+        );
+
+        // all sprites mixin
+        contents.push(`
+            @mixin all-${mapName}-sprites($dimensions: $${mapName}-sprite-dimensions) {${
+            selectors.map(image => `
+                .${mapName}-${image.name} {
+                    @include ${mapName}-sprite(${image.name}, $dimensions);
                 }`
             ).join('')}
             }`
         );
 
-        // all-<map>-sprites mixin
-        this.context.mixins.push(`
-            @mixin all-${mapName}-sprites {${
-            selectors.map(image => `
-                .${mapName}${sep}${image.name} {
-                    @include ${mapName}-${image.name};
-                }`
-            ).join('')}
-            }`
-        );
+        this.context.contents = contents.map(_ => `${_}\n`).join('').replace(/^\x20{12}/mg, '');
     }
 
     getSelectorInfo() {
-        const [selectors, pseudo] = [[], {}];
+        const [selectors, pseudoMap] = [[], {}];
+        const regex = new RegExp(`^(.*[^-_])[-_](${stateClasses.join('|')})$`);
 
         this.context.images.forEach(image => {
-            if (/^(.*[^-_])[-_](active|hover|target)$/.test(image.name)) {
+            if (regex.test(image.name)) {
                 const { $1: imageName, $2: pseudoClass } = RegExp;
-                (pseudo[imageName] || (pseudo[imageName] = {}))[pseudoClass] = image;
+                (pseudoMap[imageName] || (pseudoMap[imageName] = {}))[pseudoClass] = image;
             } else {
                 selectors.push(image);
             }
         });
 
-        return { selectors, pseudo };
+        return { selectors, pseudoMap };
     }
 
     imagePath(fileName) {
@@ -210,12 +239,24 @@ export default class SpriteMagic {
         ).replace(/\\/g, '/');
     }
 
-    contents() {
-        // create contents and outdent
-        const contents = this.context.mixins.join('').replace(/^\x20{12}/mg, '');
-        if (this.options.debug) {
-            return `/*${contents}\n*/${contents}`;
-        }
-        return contents;
+    output() {
+        const hash = CryptoJs.SHA1(this.context.contents).toString(CryptoJs.enc.HEX);
+        const tmpdir = path.resolve(os.tmpdir(), 'sprite-magic-importer');
+        const tmpfile = path.resolve(tmpdir, `${this.context.mapName}-${hash.substr(0, 7)}.scss`);
+
+        return Promise.resolve()
+            .then(() => new Promise((resolve, reject) => {
+                fs.mkdirs(tmpdir, err => (err ? reject(err) : resolve()));
+            }))
+            .then(() => new Promise((resolve, reject) => {
+                fs.outputFile(tmpfile, this.context.contents, err => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    // eslint-disable-next-line no-console
+                    console.log(`Create importer file: '${tmpfile}'`);
+                    return resolve({ file: tmpfile });
+                });
+            }));
     }
 }

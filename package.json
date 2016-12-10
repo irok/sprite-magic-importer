@@ -1,6 +1,6 @@
 {
   "name": "sprite-magic-importer",
-  "description": "Custom node-sass importer for create CSS Sprites like Magic Imports of the Comass.",
+  "description": "Custom node-sass importer for create CSS Sprites like Magic Imports of the Compass.",
   "version": "0.4.0",
   "author": "irok",
   "bugs": {
@@ -20,6 +20,7 @@
     }
   },
   "dependencies": {
+    "crypto-js": "^3.1.8",
     "fs-extra": "^1.0.0",
     "glob": "^7.1.1",
     "imagemin": "^5.2.2",
@@ -37,8 +38,10 @@
     "rollup-plugin-babel": "^2.6.1"
   },
   "homepage": "https://github.com/irok/sprite-magic-importer#readme",
+  "jsnext:main": "src/index.js",
   "keywords": [
     "compass",
+    "css-sprite",
     "css-sprites",
     "importer",
     "magic-imports",
@@ -47,7 +50,6 @@
   ],
   "license": "MIT",
   "main": "lib/index.js",
-  "jsnext:main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/irok/sprite-magic-importer.git"
