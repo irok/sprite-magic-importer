@@ -1,6 +1,5 @@
 import fs from 'fs-extra';
 import glob from 'glob';
-import os from 'os';
 import path from 'path';
 import Spritesmith from 'spritesmith';
 import imagemin from 'imagemin';
@@ -83,7 +82,7 @@ export default class SpriteMagic {
         this.context.hash = CryptoJs.SHA1(fingerprint).toString(CryptoJs.enc.HEX).substr(0, 7);
 
         const fileName = `${this.context.mapName}-${this.context.hash}.scss`;
-        this.context.sassFilePath = path.resolve(os.tmpdir(), 'sprite-magic-importer', fileName);
+        this.context.sassFilePath = path.resolve(this.options.cache_dir, fileName);
     }
 
     checkCache() {

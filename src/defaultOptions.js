@@ -1,3 +1,4 @@
+import os from 'os';
 import path from 'path';
 
 export default {
@@ -5,6 +6,7 @@ export default {
     http_path: '/',
     css_dir: 'stylesheets',
     images_dir: 'images',
+    cache_dir: path.resolve(os.tmpdir(), 'sprite-magic-importer'),
     spritesmith: {},
     pngquant: {},
 
