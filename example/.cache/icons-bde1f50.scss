@@ -6,7 +6,7 @@ $icons-sprite-dimensions: false !default;
 $icons-class-separator: $default-sprite-separator !default;
 
 #{$icons-sprite-base-class} {
-    background: url('../images/icons.png') no-repeat;
+    background: url('../images/icons.png?_=bde1f50') no-repeat;
 }
 
 $sprite-magic-icons: (

@@ -10,7 +10,7 @@ Custom node-sass importer for create CSS Sprites like Magic Imports of the Compa
 ```css
 /* Result */
 .icons-sprite, .icons-chrome, ...snip..., .icons-safari {
-  background: url("../images/icons.png") no-repeat;
+  background: url("../images/icons.png?_=bde1f50") no-repeat;
 }
 
 .icons-chrome {
