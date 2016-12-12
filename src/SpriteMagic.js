@@ -7,6 +7,7 @@ import imagemin from 'imagemin';
 import pngquant from 'imagemin-pngquant';
 import CryptoJs from 'crypto-js';
 import defaultOptions from './defaultOptions';
+import { version } from '../package.json';
 
 const stateClasses = ['hover', 'target', 'active', 'focus'];
 
@@ -28,30 +29,81 @@ export default class SpriteMagic {
 
     process(context) {
         this.context = context;
+        this.context.srcPath = path.resolve(this.options.images_dir, this.context.url);
+        this.context.mapName = path.basename(path.dirname(this.context.srcPath));
+        this.context.fileName = `${this.context.mapName}.png`;
+        this.context.imagePath = path.resolve(this.options.generated_images_dir, this.context.fileName);
 
         return Promise.resolve()
             .then(() => this.getImagesInfo())
-            .then(() => this.runSpritesmith())
-            .then(() => this.createSpriteImage())
-            .then(() => this.createContents())
-            .then(() => this.output());
+            .then(() => this.createHash())
+            .then(() => this.checkCache())
+            .then(() => (this.context.hasCache ? Promise.resolve() :
+                Promise.resolve()
+                    .then(() => this.runSpritesmith())
+                    .then(() => this.outputSpriteImage())
+                    .then(() => this.createSass())
+                    .then(() => this.outputSassFile())
+            ))
+            .then(() => this.createResult());
     }
 
     getImagesInfo() {
-        this.context.srcPath = path.resolve(this.options.images_dir, this.context.url);
-        this.context.mapName = path.basename(path.dirname(this.context.srcPath));
+        return Promise.resolve()
+            .then(() => new Promise((resolve, reject) => {
+                glob(this.context.srcPath, (err, matches) => {
+                    if (err) {
+                        return reject(err);
+                    }
 
-        return new Promise((resolve, reject) => {
-            glob(this.context.srcPath, (err, matches) => {
-                if (err) {
-                    return reject(err);
+                    this.context.images = matches.map(
+                        filePath => Object.assign({ filePath }, path.parse(filePath))
+                    );
+                    return resolve();
+                });
+            }))
+            .then(() => Promise.all(this.context.images.map(image => new Promise((resolve, reject) => {
+                fs.stat(image.filePath, (err, stats) => {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    Object.assign(image, { mtime: stats.mtime.getTime() });
+                    return resolve();
+                });
+            }))));
+    }
+
+    createHash() {
+        const fingerprint = this.context.images.map(image => `${image.filePath}~${image.mtime}`)
+            .concat(JSON.stringify(this.options.spritesmith))
+            .concat(JSON.stringify(this.options.pngquant))
+            .concat(version)
+            .join('\0');
+        this.context.hash = CryptoJs.SHA1(fingerprint).toString(CryptoJs.enc.HEX).substr(0, 7);
+
+        const fileName = `${this.context.mapName}-${this.context.hash}.scss`;
+        this.context.sassFilePath = path.resolve(os.tmpdir(), 'sprite-magic-importer', fileName);
+    }
+
+    checkCache() {
+        const latestMtime = Math.max(
+            ...this.context.images.map(image => image.mtime)
+        );
+        const promises = ['imagePath', 'sassFilePath'].map(key => new Promise((resolve, reject) => {
+            fs.stat(this.context[key], (err, stats) => {
+                if (err || stats.mtime.getTime() < latestMtime) {
+                    return reject();
                 }
-
-                this.context.images = matches.map(
-                    filePath => Object.assign({ filePath }, path.parse(filePath))
-                );
                 return resolve();
             });
+        }));
+
+        return new Promise(resolve => {
+            Promise.all(promises).then(() => {
+                this.context.hasCache = true;
+                resolve();
+            }).catch(resolve);
         });
     }
 
@@ -75,10 +127,7 @@ export default class SpriteMagic {
         });
     }
 
-    createSpriteImage() {
-        this.context.fileName = `${this.context.mapName}.png`;
-        this.context.imagePath = path.resolve(this.options.generated_images_dir, this.context.fileName);
-
+    outputSpriteImage() {
         return Promise.resolve()
             .then(() => (
                 imagemin.buffer(this.context.imageData, {
@@ -93,13 +142,13 @@ export default class SpriteMagic {
             }));
     }
 
-    createContents() {
+    createSass() {
         const { selectors, pseudoMap } = this.getSelectorInfo();
         const { mapName, fileName } = this.context;
-        const contents = [];
+        const sass = [];
 
         // variables
-        contents.push(`
+        sass.push(`
             $disable-magic-sprite-selectors: false !default;
             $sprite-selectors: ${stateClasses.join(', ')} !default;
             $default-sprite-separator: '-' !default;
@@ -109,14 +158,14 @@ export default class SpriteMagic {
         );
 
         // sprite image class
-        contents.push(`
+        sass.push(`
             #{$${mapName}-sprite-base-class} {
                 background: url('${this.imagePath(fileName)}') no-repeat;
             }`
         );
 
         // sprites data
-        contents.push(`
+        sass.push(`
             $sprite-magic-${mapName}: (${
             selectors.map(image => `
                 ${image.name}: (
@@ -133,14 +182,14 @@ export default class SpriteMagic {
         );
 
         // width and height function
-        contents.push(...['width', 'height'].map(prop => `
+        sass.push(...['width', 'height'].map(prop => `
             @function ${mapName}-sprite-${prop}($sprite) {
                 @return map-get(map-get($sprite-magic-${mapName}, $sprite), '${prop}');
             }`
         ));
 
         // dimensions mixin
-        contents.push(`
+        sass.push(`
             @mixin ${mapName}-sprite-dimensions($sprite) {
                 width: ${mapName}-sprite-width($sprite);
                 height: ${mapName}-sprite-height($sprite);
@@ -148,7 +197,7 @@ export default class SpriteMagic {
         );
 
         // background position mixin
-        contents.push(`
+        sass.push(`
             @mixin sprite-magic-background-position($sprite-data, $offset-x: 0, $offset-y: 0) {
                 $x: $offset-x - map-get($sprite-data, 'x');
                 $y: $offset-y - map-get($sprite-data, 'y');
@@ -157,7 +206,7 @@ export default class SpriteMagic {
         );
 
         // state selector
-        contents.push(`
+        sass.push(`
             @mixin ${mapName}-sprite-selectors(
                 $sprite-name, $full-sprite-name, $offset-x: 0, $offset-y: 0,
                 $unsupported: false, $separator: $${mapName}-class-separator
@@ -175,7 +224,7 @@ export default class SpriteMagic {
         );
 
         // sprite mixin
-        contents.push(`
+        sass.push(`
             @mixin ${mapName}-sprite(
                 $sprite, $dimensions: $${mapName}-sprite-dimensions, $offset-x: 0, $offset-y: 0, $unsupported: false,
                 $use-magic-selectors: not $disable-magic-sprite-selectors, $separator: $${mapName}-class-separator
@@ -195,7 +244,7 @@ export default class SpriteMagic {
         );
 
         // all sprites mixin
-        contents.push(`
+        sass.push(`
             @mixin all-${mapName}-sprites($dimensions: $${mapName}-sprite-dimensions) {${
             selectors.map(image => `
                 .${mapName}-${image.name} {
@@ -205,7 +254,26 @@ export default class SpriteMagic {
             }`
         );
 
-        this.context.contents = contents.map(_ => `${_}\n`).join('').replace(/^\x20{12}/mg, '').slice(1);
+        this.context.sass = sass.map(_ => `${_}\n`).join('').replace(/^\x20{12}/mg, '').slice(1);
+    }
+
+    outputSassFile() {
+        return new Promise((resolve, reject) => {
+            fs.outputFile(this.context.sassFilePath, this.context.sass, err => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve();
+            });
+        });
+    }
+
+    createResult() {
+        const msg = this.context.hasCache ? 'use cache' : 'create';
+        // eslint-disable-next-line no-console
+        console.info(`sprite-magic-importer ${msg} file: '${this.context.sassFilePath}'`);
+
+        return { file: this.context.sassFilePath };
     }
 
     getSelectorInfo() {
@@ -232,22 +300,5 @@ export default class SpriteMagic {
             ),
             fileName
         ).replace(/\\/g, '/');
-    }
-
-    output() {
-        const hash = CryptoJs.SHA1(this.context.contents).toString(CryptoJs.enc.HEX);
-        const fileName = `${this.context.mapName}-${hash.substr(0, 7)}.scss`;
-        const filePath = path.resolve(os.tmpdir(), 'sprite-magic-importer', fileName);
-
-        return new Promise((resolve, reject) => {
-            fs.outputFile(filePath, this.context.contents, err => {
-                if (err) {
-                    return reject(err);
-                }
-                // eslint-disable-next-line no-console
-                console.info(`Create importer file: '${filePath}'`);
-                return resolve({ file: filePath });
-            });
-        });
     }
 }

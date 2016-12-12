@@ -1,4 +1,5 @@
 import babel from 'rollup-plugin-babel';
+import json from 'rollup-plugin-json';
 const { dependencies } = require('./package.json');
 
 export default {
@@ -6,6 +7,7 @@ export default {
     dest:  'lib/index.js',
     format: 'cjs',
     plugins: [
+        json(),
         babel()
     ],
     external: Object.keys(dependencies).concat([
