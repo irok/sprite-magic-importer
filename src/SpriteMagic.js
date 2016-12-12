@@ -159,7 +159,7 @@ export default class SpriteMagic {
         // sprite image class
         sass.push(`
             #{$${mapName}-sprite-base-class} {
-                background: url('${this.imagePath(fileName)}') no-repeat;
+                background: url('${this.imagePath(fileName)}?_=${this.context.hash}') no-repeat;
             }`
         );
 
