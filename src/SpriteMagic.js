@@ -6,7 +6,6 @@ import imagemin from 'imagemin';
 import pngquant from 'imagemin-pngquant';
 import CryptoJs from 'crypto-js';
 import defaultOptions from './defaultOptions';
-import { version } from '../package.json';
 
 const stateClasses = ['hover', 'target', 'active', 'focus'];
 
@@ -77,7 +76,7 @@ export default class SpriteMagic {
         const fingerprint = this.context.images.map(image => `${image.filePath}~${image.mtime}`)
             .concat(JSON.stringify(this.options.spritesmith))
             .concat(JSON.stringify(this.options.pngquant))
-            .concat(version)
+            .concat(require('../package.json').version)     // eslint-disable-line global-require
             .join('\0');
         this.context.hash = CryptoJs.SHA1(fingerprint).toString(CryptoJs.enc.HEX).substr(0, 7);
 

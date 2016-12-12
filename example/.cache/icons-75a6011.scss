@@ -1,0 +1,97 @@
+$disable-magic-sprite-selectors: false !default;
+$sprite-selectors: hover, target, active, focus !default;
+$default-sprite-separator: '-' !default;
+$icons-sprite-base-class: '.icons-sprite' !default;
+$icons-sprite-dimensions: false !default;
+$icons-class-separator: $default-sprite-separator !default;
+
+#{$icons-sprite-base-class} {
+    background: url('../images/icons.png?_=75a6011') no-repeat;
+}
+
+$sprite-magic-icons: (
+    chrome: (
+        x: 40px, y: 0, width: 40px, height: 40px, hover: (x: 0, y: 0)
+    ),
+    firefox: (
+        x: 40px, y: 40px, width: 40px, height: 40px, hover: (x: 0, y: 40px)
+    ),
+    ie: (
+        x: 80px, y: 40px, width: 40px, height: 40px, hover: (x: 80px, y: 0)
+    ),
+    opera: (
+        x: 0, y: 80px, width: 40px, height: 40px
+    ),
+    safari: (
+        x: 40px, y: 80px, width: 40px, height: 40px
+    )
+);
+
+@function icons-sprite-width($sprite) {
+    @return map-get(map-get($sprite-magic-icons, $sprite), 'width');
+}
+
+@function icons-sprite-height($sprite) {
+    @return map-get(map-get($sprite-magic-icons, $sprite), 'height');
+}
+
+@mixin icons-sprite-dimensions($sprite) {
+    width: icons-sprite-width($sprite);
+    height: icons-sprite-height($sprite);
+}
+
+@mixin sprite-magic-background-position($sprite-data, $offset-x: 0, $offset-y: 0) {
+    $x: $offset-x - map-get($sprite-data, 'x');
+    $y: $offset-y - map-get($sprite-data, 'y');
+    background-position: $x $y;
+}
+
+@mixin icons-sprite-selectors(
+    $sprite-name, $full-sprite-name, $offset-x: 0, $offset-y: 0,
+    $unsupported: false, $separator: $icons-class-separator
+) {
+    $sprite-data: map-get($sprite-magic-icons, $sprite-name);
+    @each $state in $sprite-selectors {
+        @if map-has-key($sprite-data, $state) {
+            $sprite-class: "#{$full-sprite-name}#{$separator}#{$state}";
+            &:#{$state}, &.#{$sprite-class} {
+                @include sprite-magic-background-position(map-get($sprite-data, $state), $offset-x, $offset-y);
+            }
+        }
+    }
+}
+
+@mixin icons-sprite(
+    $sprite, $dimensions: $icons-sprite-dimensions, $offset-x: 0, $offset-y: 0, $unsupported: false,
+    $use-magic-selectors: not $disable-magic-sprite-selectors, $separator: $icons-class-separator
+) {
+    $sprite-data: map-get($sprite-magic-icons, $sprite);
+    @extend #{$icons-sprite-base-class};
+    @include sprite-magic-background-position($sprite-data, $offset-x, $offset-y);
+    @if $dimensions {
+        @include icons-sprite-dimensions($sprite);
+    }
+    @if $use-magic-selectors {
+        @include icons-sprite-selectors(
+            $sprite, $sprite, $offset-x, $offset-y, $unsupported, $separator
+        );
+    }
+}
+
+@mixin all-icons-sprites($dimensions: $icons-sprite-dimensions) {
+    .icons-chrome {
+        @include icons-sprite(chrome, $dimensions);
+    }
+    .icons-firefox {
+        @include icons-sprite(firefox, $dimensions);
+    }
+    .icons-ie {
+        @include icons-sprite(ie, $dimensions);
+    }
+    .icons-opera {
+        @include icons-sprite(opera, $dimensions);
+    }
+    .icons-safari {
+        @include icons-sprite(safari, $dimensions);
+    }
+}
