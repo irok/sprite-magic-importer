@@ -296,24 +296,22 @@ export default class SpriteMagic {
     }
 
     spriteImageUrl() {
-        const imageUrlBase = path.dirname(
-            path.normalize(path.join(
+        const imageUrl = `${
+            path.dirname(path.normalize(path.join(
                 this.options.http_generated_images_path,
                 this.context.url
-            ))
-        );
+            )))
+        }.png`;
 
-        if (imageUrlBase[0] === '/') {
-            return `${imageUrlBase}.png`.replace(/\\/g, '/');
+        if (imageUrl[0] === path.sep) {
+            return imageUrl.replace(/\\/g, '/');
         }
 
-        return path.relative(
-            path.dirname(path.join(
-                this.options.http_stylesheets_path,
-                path.relative(this.options.sass_path, this.context.prev)
-            )),
-            `${imageUrlBase}.png`
-        ).replace(/\\/g, '/');
+        const cssUrlDir = path.dirname(path.join(
+            this.options.http_stylesheets_path,
+            path.relative(this.options.sass_path, this.context.prev)
+        ));
+        return path.relative(cssUrlDir, imageUrl).replace(/\\/g, '/');
     }
 
     spriteImagePath() {
