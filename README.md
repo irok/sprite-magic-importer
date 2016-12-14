@@ -1,14 +1,16 @@
 # sprite-magic-importer
 Custom node-sass importer for create CSS Sprites like Magic Imports of the Compass.
 
+Input
+
 ```scss
-/* Input */
 @import "icons/*.png";
 @include all-icons-sprites(true);
 ```
 
+Output
+
 ```css
-/* Result */
 .icons-sprite, .icons-chrome, ...snip..., .icons-safari {
   background: url("../images/icons.png?_=bde1f50") no-repeat;
 }
@@ -30,7 +32,7 @@ Custom node-sass importer for create CSS Sprites like Magic Imports of the Compa
 
 See: [Example](https://github.com/irok/sprite-magic-importer/tree/master/example)
 
-## Supported features
+## Supported Compass features
 
 ### Mixins and Functions
 * `@mixin all-<map>-sprites()`
@@ -64,6 +66,7 @@ var SpriteMagicImporter = require('sprite-magic-importer');
 
 module.exports = SpriteMagicImporter({
     // http://compass-style.org/help/documentation/configuration-reference/
+    sass_dir:                   'src/sass',
     images_dir:                 'src/images',
     generated_images_dir:       'htdocs/images',
     http_stylesheets_path:      'css',
