@@ -25,7 +25,6 @@
     "glob": "^7.1.1",
     "imagemin": "^5.2.2",
     "imagemin-pngquant": "^5.0.0",
-    "rollup-plugin-json": "^2.0.2",
     "spritesmith": "^3.1.0"
   },
   "devDependencies": {
@@ -36,7 +35,8 @@
     "node-sass": "^3.13.0",
     "pre-git": "^3.11.1",
     "rollup": "^0.36.4",
-    "rollup-plugin-babel": "^2.6.1"
+    "rollup-plugin-babel": "^2.6.1",
+    "rollup-plugin-json": "^2.0.2"
   },
   "homepage": "https://github.com/irok/sprite-magic-importer#readme",
   "jsnext:main": "src/index.js",
@@ -58,7 +58,7 @@
   "scripts": {
     "build": "rollup -c",
     "build:all": "npm run build && npm run build:example",
-    "build:example": "node-sass --importer example/importer.js --output-style expanded -o example/htdocs/css example/app.scss",
+    "build:example": "node-sass --importer example/importer.js --output-style expanded -o example/htdocs/css/view example/sass/view/app.scss",
     "commit": "commit-wizard",
     "lint": "eslint src",
     "test": "echo \"Error: no test specified\" && exit 1"

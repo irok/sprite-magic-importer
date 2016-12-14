@@ -3,6 +3,7 @@
 var configure = require('../');
 
 module.exports = configure({
+    sass_dir:                   'example/sass',
     images_dir:                 'example/images',
     generated_images_dir:       'example/htdocs/images',
     http_stylesheets_path:      'css',
