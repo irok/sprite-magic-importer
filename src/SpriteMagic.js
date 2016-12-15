@@ -88,23 +88,22 @@ export default class SpriteMagic {
             this.spriteImagePath(),
             this.spriteSassPath()
         ];
+        const hasNotChanged = file => new Promise((resolve, reject) => {
+            fs.stat(file, (err, stats) => {
+                if (err || stats.mtime.getTime() < latestMtime) {
+                    return reject();
+                }
+                return resolve();
+            });
+        });
 
-        return new Promise(done => {
-            Promise.all(cacheFiles.map(
-                file => new Promise((resolve, reject) => {
-                    fs.stat(file, (err, stats) => {
-                        if (err || stats.mtime.getTime() < latestMtime) {
-                            return reject();
-                        }
-                        return resolve();
-                    });
+        return new Promise(resolve => {
+            Promise.all(cacheFiles.map(hasNotChanged))
+                .then(() => {
+                    this.context.hasCache = this.options.use_cache;
+                    resolve();
                 })
-            ))
-            .then(() => {
-                this.context.hasCache = this.options.use_cache;
-                done();
-            })
-            .catch(done);
+                .catch(resolve);
         });
     }
 
