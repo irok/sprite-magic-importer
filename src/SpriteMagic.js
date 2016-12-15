@@ -4,13 +4,23 @@ import path from 'path';
 import Spritesmith from 'spritesmith';
 import imagemin from 'imagemin';
 import pngquant from 'imagemin-pngquant';
-import CryptoJs from 'crypto-js';
+import Crypto from 'crypto-js';
 import createOptions from './defaultOptions';
 
 const stateClasses = ['hover', 'target', 'active', 'focus'];
 
 function px(value) {
     return value === 0 ? '0' : `${value}px`;
+}
+
+function cbResolver([resolve, reject], success = x => x, fail = x => x) {
+    return (err, result) => {
+        if (err) {
+            reject(fail(err));
+        } else {
+            resolve(success(result));
+        }
+    };
 }
 
 export default class SpriteMagic {
@@ -44,31 +54,24 @@ export default class SpriteMagic {
     }
 
     getImagesInfo() {
-        const srcPath = path.resolve(this.options.images_path, this.context.url);
+        const src = path.resolve(this.options.images_path, this.context.url);
 
         return Promise.resolve()
-            .then(() => new Promise((resolve, reject) => {
-                glob(srcPath, (err, matches) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    this.context.images = matches.map(
-                        filePath => Object.assign({ filePath }, path.parse(filePath))
-                    );
-                    return resolve();
-                });
+            .then(() => new Promise((...cb) => {
+                glob(src, cbResolver(cb));
             }))
-            .then(() => Promise.all(this.context.images.map(
-                image => new Promise((resolve, reject) => {
-                    fs.stat(image.filePath, (err, stats) => {
-                        if (err) {
-                            return reject(err);
-                        }
-                        Object.assign(image, { mtime: stats.mtime.getTime() });
-                        return resolve();
-                    });
+            .then(matches => Promise.all(matches.map(
+                filePath => new Promise((...cb) => {
+                    fs.stat(filePath, cbResolver(cb, stats => ({ filePath, stats })));
                 })
-            )));
+            )))
+            .then(images => {
+                this.context.images = images.map(image => ({
+                    filePath: image.filePath,
+                    name: path.basename(image.filePath, '.png'),
+                    mtime: image.stats.mtime.getTime()
+                }));
+            });
     }
 
     createHash() {
@@ -77,7 +80,7 @@ export default class SpriteMagic {
             .concat(JSON.stringify(this.options))
             .concat(require('../package.json').version)     // eslint-disable-line global-require
             .join('\0');
-        this.context.hash = CryptoJs.SHA1(fingerprint).toString(CryptoJs.enc.HEX).substr(0, 7);
+        this.context.hash = Crypto.SHA1(fingerprint).toString(Crypto.enc.HEX).substr(0, 7);
     }
 
     checkCache() {
@@ -111,38 +114,31 @@ export default class SpriteMagic {
             src: this.context.images.map(image => image.filePath)
         });
 
-        return new Promise((resolve, reject) => {
-            Spritesmith.run(options, (err, result) => {
-                if (err) {
-                    return reject(err);
-                }
-                this.context.imageData = result.image;
+        return Promise.resolve()
+            .then(() => new Promise((...cb) => {
+                Spritesmith.run(options, cbResolver(cb));
+            }))
+            .then(sprite => {
+                this.context.imageData = sprite.image;
                 this.context.images.forEach(image => {
-                    Object.assign(image, result.coordinates[image.filePath]);
+                    Object.assign(image, sprite.coordinates[image.filePath]);
                 });
-                return resolve();
             });
-        });
     }
 
     outputSpriteImage() {
         return Promise.resolve()
-            .then(() => (
-                imagemin.buffer(this.context.imageData, {
-                    use: [pngquant(this.options.pngquant)]
-                })
-            ))
-            .then(buf => (this.context.imageData = buf))
-            .then(() => new Promise((resolve, reject) => {
-                fs.outputFile(this.spriteImagePath(), this.context.imageData,
-                    err => (err ? reject(err) : resolve())
-                );
+            .then(() => imagemin.buffer(this.context.imageData, {
+                use: [pngquant(this.options.pngquant)]
+            }))
+            .then(buf => new Promise((...cb) => {
+                fs.outputFile(this.spriteImagePath(), buf, cbResolver(cb));
             }));
     }
 
     createSass() {
         const { selectors, pseudoMap } = this.getSelectorInfo();
-        const { mapName } = this.context;
+        const { mapName, hash } = this.context;
         const sass = [];
 
         // variables
@@ -158,7 +154,7 @@ export default class SpriteMagic {
         // sprite image class
         sass.push(`
             #{$${mapName}-sprite-base-class} {
-                background: url('${this.spriteImageUrl()}?_=${this.context.hash}') no-repeat;
+                background: url('${this.spriteImageUrl()}?_=${hash}') no-repeat;
             }`
         );
 
@@ -256,13 +252,8 @@ export default class SpriteMagic {
     }
 
     outputSassFile() {
-        return new Promise((resolve, reject) => {
-            fs.outputFile(this.spriteSassPath(), this.context.sass, err => {
-                if (err) {
-                    return reject(err);
-                }
-                return resolve();
-            });
+        return new Promise((...cb) => {
+            fs.outputFile(this.spriteSassPath(), this.context.sass, cbResolver(cb));
         });
     }
 

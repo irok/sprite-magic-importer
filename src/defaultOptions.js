@@ -13,7 +13,7 @@ const defaults = {
     pngquant: {}
 };
 
-export default function (options) {
+export default options => {
     const self = Object.assign({}, defaults, options);
 
     if (typeof self.generated_images_dir === 'undefined') {
@@ -27,4 +27,4 @@ export default function (options) {
         http_generated_images_path: path.join(self.http_path, self.generated_images_dir),
         http_stylesheets_path:      path.join(self.http_path, self.css_dir)
     }, self);
-}
+};
