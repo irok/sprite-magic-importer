@@ -13,13 +13,12 @@ function px(value) {
     return value === 0 ? '0' : `${value}px`;
 }
 
-function cbResolver([resolve, reject], success = x => x, fail = x => x) {
+function cbResolver([resolve, reject], success = x => x) {
     return (err, result) => {
         if (err) {
-            reject(fail(err));
-        } else {
-            resolve(success(result));
+            return reject(err);
         }
+        return resolve(success(result));
     };
 }
 
