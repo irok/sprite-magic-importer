@@ -4,26 +4,23 @@ $default-sprite-separator: '-' !default;
 $icons-sprite-base-class: '.icons-sprite' !default;
 $icons-sprite-dimensions: false !default;
 $icons-class-separator: $default-sprite-separator !default;
+$icons-pixel-ratio: 2;
+$icons-sprite-width: 192px;
+$icons-sprite-height: 128px;
 
 #{$icons-sprite-base-class} {
-    background: url('../../images/foobar/icons.png?_=07cb53f') no-repeat;
+    background: url('../../images/foobar/icons@2x.png?_=431fce5') no-repeat;
 }
 
 $sprite-magic-icons: (
     chrome: (
-        x: 40px, y: 0, width: 40px, height: 40px, hover: (x: 0, y: 0)
+        x: 64px, y: 0, width: 64px, height: 64px, hover: (x: 0, y: 0, width: 64px, height: 64px)
     ),
     firefox: (
-        x: 40px, y: 40px, width: 40px, height: 40px, hover: (x: 0, y: 40px)
+        x: 64px, y: 64px, width: 64px, height: 64px, hover: (x: 0, y: 64px, width: 64px, height: 64px)
     ),
     ie: (
-        x: 80px, y: 40px, width: 40px, height: 40px, hover: (x: 80px, y: 0)
-    ),
-    opera: (
-        x: 0, y: 80px, width: 40px, height: 40px
-    ),
-    safari: (
-        x: 40px, y: 80px, width: 40px, height: 40px
+        x: 128px, y: 64px, width: 64px, height: 64px, hover: (x: 128px, y: 0, width: 64px, height: 64px)
     )
 );
 
@@ -36,14 +33,14 @@ $sprite-magic-icons: (
 }
 
 @mixin icons-sprite-dimensions($sprite) {
-    width: icons-sprite-width($sprite);
-    height: icons-sprite-height($sprite);
+    width: #{icons-sprite-width($sprite) / $icons-pixel-ratio};
+    height: #{icons-sprite-height($sprite) / $icons-pixel-ratio};
 }
 
 @mixin sprite-magic-background-position($sprite-data, $offset-x: 0, $offset-y: 0) {
     $x: $offset-x - map-get($sprite-data, 'x');
     $y: $offset-y - map-get($sprite-data, 'y');
-    background-position: $x $y;
+    background-position: #{$x / $icons-pixel-ratio} #{$y / $icons-pixel-ratio};
 }
 
 @mixin icons-sprite-selectors(
@@ -68,6 +65,9 @@ $sprite-magic-icons: (
     $sprite-data: map-get($sprite-magic-icons, $sprite);
     @extend #{$icons-sprite-base-class};
     @include sprite-magic-background-position($sprite-data, $offset-x, $offset-y);
+    @if $icons-pixel-ratio != 1 {
+        background-size: #{$icons-sprite-width / $icons-pixel-ratio} #{$icons-sprite-height / $icons-pixel-ratio}
+    }
     @if $dimensions {
         @include icons-sprite-dimensions($sprite);
     }
@@ -87,11 +87,5 @@ $sprite-magic-icons: (
     }
     .icons-ie {
         @include icons-sprite(ie, $dimensions);
-    }
-    .icons-opera {
-        @include icons-sprite(opera, $dimensions);
-    }
-    .icons-safari {
-        @include icons-sprite(safari, $dimensions);
     }
 }

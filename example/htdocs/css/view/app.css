@@ -1,11 +1,11 @@
-.icons-sprite, .icons-chrome, .icons-firefox, .icons-ie, .icons-opera, .icons-safari, .foo {
-  background: url("../../images/foobar/icons.png?_=07cb53f") no-repeat;
+.icons-sprite, .icons-chrome, .icons-firefox, .icons-ie {
+  background: url("../../images/foobar/icons.png?_=31a83d5") no-repeat;
 }
 
 .icons-chrome {
-  background-position: -40px 0;
-  width: 40px;
-  height: 40px;
+  background-position: -32px 0;
+  width: 32px;
+  height: 32px;
 }
 
 .icons-chrome:hover, .icons-chrome.chrome-hover {
@@ -13,37 +13,54 @@
 }
 
 .icons-firefox {
-  background-position: -40px -40px;
-  width: 40px;
-  height: 40px;
+  background-position: -32px -32px;
+  width: 32px;
+  height: 32px;
 }
 
 .icons-firefox:hover, .icons-firefox.firefox-hover {
-  background-position: 0 -40px;
+  background-position: 0 -32px;
 }
 
 .icons-ie {
-  background-position: -80px -40px;
-  width: 40px;
-  height: 40px;
+  background-position: -64px -32px;
+  width: 32px;
+  height: 32px;
 }
 
 .icons-ie:hover, .icons-ie.ie-hover {
-  background-position: -80px 0;
+  background-position: -64px 0;
 }
 
-.icons-opera {
-  background-position: 0 -80px;
-  width: 40px;
-  height: 40px;
-}
-
-.icons-safari {
-  background-position: -40px -80px;
-  width: 40px;
-  height: 40px;
-}
-
-.foo {
-  background-position: -40px -80px;
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .icons-sprite, .icons-chrome, .icons-firefox, .icons-ie {
+    background: url("../../images/foobar/icons@2x.png?_=431fce5") no-repeat;
+  }
+  .icons-chrome {
+    background-position: -32px 0;
+    background-size: 96px 64px;
+    width: 32px;
+    height: 32px;
+  }
+  .icons-chrome:hover, .icons-chrome.chrome-hover {
+    background-position: 0 0;
+  }
+  .icons-firefox {
+    background-position: -32px -32px;
+    background-size: 96px 64px;
+    width: 32px;
+    height: 32px;
+  }
+  .icons-firefox:hover, .icons-firefox.firefox-hover {
+    background-position: 0 -32px;
+  }
+  .icons-ie {
+    background-position: -64px -32px;
+    background-size: 96px 64px;
+    width: 32px;
+    height: 32px;
+  }
+  .icons-ie:hover, .icons-ie.ie-hover {
+    background-position: -64px 0;
+  }
 }
