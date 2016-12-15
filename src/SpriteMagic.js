@@ -8,6 +8,7 @@ import Crypto from 'crypto-js';
 import createOptions from './defaultOptions';
 
 const stateClasses = ['hover', 'target', 'active', 'focus'];
+const imageProps = ['x', 'y', 'width', 'height'];
 
 function px(value) {
     return value === 0 ? '0' : `${value}px`;
@@ -31,15 +32,14 @@ export default class SpriteMagic {
         if (!/\.png$/.test(url)) {
             return Promise.resolve();
         }
-
-        const mapName = path.basename(path.dirname(url));
-        return this.process({ url, prev, mapName });
+        return this.process({ url, prev });
     }
 
     process(context) {
         this.context = context;
 
         return Promise.resolve()
+            .then(() => this.checkPixelRatio())
             .then(() => this.getImagesInfo())
             .then(() => this.createHash())
             .then(() => this.checkCache())
@@ -50,6 +50,19 @@ export default class SpriteMagic {
                 .then(() => this.outputSassFile())
             ))
             .then(() => this.createResult());
+    }
+
+    checkPixelRatio() {
+        this.context.mapName = this.commonName(path.basename(path.dirname(this.context.url)));
+
+        const pathInfo = path.parse(this.context.url);
+        if (this.options.retina_mark.test(pathInfo.name)) {
+            this.context.pixelRatio = parseFloat(RegExp.$1);
+            this.context.suffix = RegExp.lastMatch;
+        } else {
+            this.context.pixelRatio = 1;
+            this.context.suffix = '';
+        }
     }
 
     getImagesInfo() {
@@ -64,13 +77,25 @@ export default class SpriteMagic {
                     fs.stat(filePath, cbResolver(cb, stats => ({ filePath, stats })));
                 })
             )))
+            .then(images => images.map(image => this.createImageInfo(image)))
             .then(images => {
-                this.context.images = images.map(image => ({
-                    filePath: image.filePath,
-                    name: path.basename(image.filePath, '.png'),
-                    mtime: image.stats.mtime.getTime()
-                }));
+                if (this.context.pixelRatio === 1) {
+                    this.context.images = images.filter(image => image.name === image.basename);
+                } else {
+                    this.context.images = images;
+                }
             });
+    }
+
+    createImageInfo(image) {
+        const basename = path.basename(image.filePath, '.png');
+
+        return {
+            filePath: image.filePath,
+            basename,
+            name: this.commonName(basename),
+            mtime: image.stats.mtime.getTime()
+        };
     }
 
     createHash() {
@@ -118,6 +143,7 @@ export default class SpriteMagic {
             }))
             .then(sprite => {
                 this.context.imageData = sprite.image;
+                this.context.sprite = sprite.properties;
                 this.context.images.forEach(image => {
                     Object.assign(image, sprite.coordinates[image.filePath]);
                 });
@@ -146,7 +172,10 @@ export default class SpriteMagic {
             $default-sprite-separator: '-' !default;
             $${mapName}-sprite-base-class: '.${mapName}-sprite' !default;
             $${mapName}-sprite-dimensions: false !default;
-            $${mapName}-class-separator: $default-sprite-separator !default;`
+            $${mapName}-class-separator: $default-sprite-separator !default;
+            $${mapName}-pixel-ratio: ${this.context.pixelRatio};
+            $${mapName}-sprite-width: ${px(this.context.sprite.width)};
+            $${mapName}-sprite-height: ${px(this.context.sprite.height)};`
         );
 
         // sprite image class
@@ -161,11 +190,11 @@ export default class SpriteMagic {
             $sprite-magic-${mapName}: (${
             selectors.map(image => `
                 ${image.name}: (
-                    x: ${px(image.x)}, y: ${px(image.y)}, width: ${px(image.width)}, height: ${px(image.height)}${
+                    ${imageProps.map(prop => `${prop}: ${px(image[prop])}`).join(', ')}${
                 stateClasses.map(state => (
                     !pseudoMap[image.name] || !pseudoMap[image.name][state] ? '' :
                     `, ${state}: (${
-                        ['x', 'y'].map(prop => `${prop}: ${px(pseudoMap[image.name][state][prop])}`).join(', ')
+                        imageProps.map(prop => `${prop}: ${px(pseudoMap[image.name][state][prop])}`).join(', ')
                     })`
                 )).join('')}
                 )`
@@ -183,8 +212,8 @@ export default class SpriteMagic {
         // dimensions mixin
         sass.push(`
             @mixin ${mapName}-sprite-dimensions($sprite) {
-                width: ${mapName}-sprite-width($sprite);
-                height: ${mapName}-sprite-height($sprite);
+                width: #{${mapName}-sprite-width($sprite) / $${mapName}-pixel-ratio};
+                height: #{${mapName}-sprite-height($sprite) / $${mapName}-pixel-ratio};
             }`
         );
 
@@ -193,7 +222,7 @@ export default class SpriteMagic {
             @mixin sprite-magic-background-position($sprite-data, $offset-x: 0, $offset-y: 0) {
                 $x: $offset-x - map-get($sprite-data, 'x');
                 $y: $offset-y - map-get($sprite-data, 'y');
-                background-position: $x $y;
+                background-position: #{$x / $${mapName}-pixel-ratio} #{$y / $${mapName}-pixel-ratio};
             }`
         );
 
@@ -224,6 +253,9 @@ export default class SpriteMagic {
                 $sprite-data: map-get($sprite-magic-${mapName}, $sprite);
                 @extend #{$${mapName}-sprite-base-class};
                 @include sprite-magic-background-position($sprite-data, $offset-x, $offset-y);
+                @if $${mapName}-pixel-ratio != 1 {
+                    background-size: #{$${mapName}-sprite-width / $${mapName}-pixel-ratio} #{$${mapName}-sprite-height / $${mapName}-pixel-ratio}
+                }
                 @if $dimensions {
                     @include ${mapName}-sprite-dimensions($sprite);
                 }
@@ -290,7 +322,7 @@ export default class SpriteMagic {
                 this.options.http_generated_images_path,
                 this.context.url
             )))
-        }.png`;
+        }${this.context.suffix}.png`;
 
         if (imageUrl[0] === path.sep) {
             return imageUrl.replace(/\\/g, '/');
@@ -310,11 +342,15 @@ export default class SpriteMagic {
                 this.context.url
             )
         );
-        return `${imageFileBase}.png`;
+        return `${imageFileBase}${this.context.suffix}.png`;
     }
 
     spriteSassPath() {
         const fileName = `${this.context.mapName}-${this.context.hash}.scss`;
         return path.resolve(this.options.cache_dir, fileName);
+    }
+
+    commonName(name) {
+        return name.replace(this.options.retina_mark, '');
     }
 }

@@ -7,6 +7,7 @@ const defaults = {
     sass_dir: 'sass',
     css_dir: 'stylesheets',
     images_dir: 'images',
+    retina_mark: /@(\d)x$/,
     use_cache: true,
     cache_dir: path.resolve(os.tmpdir(), 'sprite-magic-importer'),
     spritesmith: {},
