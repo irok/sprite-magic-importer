@@ -11,23 +11,23 @@ Input
 Output
 
 ```css
-.icons-sprite, .icons-chrome, ...snip..., .icons-safari {
-  background: url("../images/icons.png?_=bde1f50") no-repeat;
+.icons-sprite, .icons-chrome, .icons-firefox, .icons-ie {
+  background-image: url("../images/icons.png?_=d25a48e");
+  background-repeat: no-repeat;
 }
 
 .icons-chrome {
-  background-position: 0 0;
-  width: 40px;
-  height: 40px;
+  background-position: -32px 0;
+  width: 32px;
+  height: 32px;
 }
 
 ...snip...
 
-.icons-safari {
-  background-position: 0 -80px;
-  width: 40px;
-  height: 40px;
+.icons-ie:hover, .icons-ie.ie-hover {
+  background-position: -64px 0;
 }
+
 ```
 
 See: [Example](https://github.com/irok/sprite-magic-importer/tree/master/example)
@@ -59,9 +59,9 @@ Supported are hover, target, active, and focus.
     * default: `$default-sprite-separator`
 
 ## Usage
-Create `importer.js`
+Create configure script.
 
-```js
+```js:importer.js
 var SpriteMagicImporter = require('sprite-magic-importer');
 
 module.exports = SpriteMagicImporter({
@@ -86,7 +86,7 @@ module.exports = SpriteMagicImporter({
 });
 ```
 
-```js
+```js:build.js
 var sass = require('node-sass');
 var importer = require('./importer');
 
@@ -97,12 +97,52 @@ sass.render({
 });
 ```
 
+### configure options
+* project_path `string` - The path to the root of the project.
+    * default: `process.cwd()`
+* http_path `string` - The path to the project when running within the web server.
+    * default: `/`
+* sass_dir `string` - The directory where the sass stylesheets are kept. It is relative to the project_path.
+    * default: `sass`
+* css_dir `string` - The directory where the css stylesheets are kept. It is relative to the project_path.
+    * default: `stylesheets`
+* images_dir `string` - The directory where the images are kept. It is relative to the project_path.
+    * default: `images`
+* generated_images_dir `string` - The directory where generated images are kept. It is relative to the project_path.
+    * default: images_dir
+* http_generated_images_path `string` - The full http path to generated images on the web server.
+    * default: http_path + `/` + generated_images_dir
+* http_stylesheets_path `string` - The full http path to stylesheets on the web server.
+    * default: http_path + `/` + css_dir
+* use_cache `boolean` - Set this to true to speed up using the cache.
+    * default: true
+* cache_dir `string` - The full path to where cache of temporary stylesheets are kept.
+    * default: os.tmpdir() + `/sprite-magic-importer`
+* retina_mark `regexp` - Regular expression for detecting high resolution image from file name.
+    * default: `/@(\d)x$/`
+* spritesmith `object` - This option is passed to the `Spritesmith.run()`.
+    * See: https://www.npmjs.com/package/spritesmith#spritesmithrunparams-callback
+* pngquant `object` - This option is passed to the `Spritesmith.run()`.
+    * See: https://www.npmjs.com/package/imagemin-pngquant#options
+
 ### CLI
 ```bash
 node-sass --importer ./importer.js -o dist/css src/app.scss
 ```
 
-# License
+## Retina support
+
+```scss
+@import "icons/*.png";              // '*@2x.png' will not be imported
+@include all-icons-sprites(true);
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+    @import "icons/*@2x.png";
+    @include all-icons-sprites();
+}
+```
+
+## License
 
 The MIT License (MIT)
 
