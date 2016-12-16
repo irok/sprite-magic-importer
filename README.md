@@ -136,7 +136,7 @@ sass.render({
     * default: `/@(\d)x$/`
 * spritesmith `object` - This option is passed to the `Spritesmith.run()`.
     * See: https://www.npmjs.com/package/spritesmith#spritesmithrunparams-callback
-* pngquant `object` - This option is passed to the `Spritesmith.run()`.
+* pngquant `object` - This option is passed to the `imagemin-pngquant`.
     * See: https://www.npmjs.com/package/imagemin-pngquant#options
 
 ### CLI
