@@ -71,7 +71,9 @@ Supported are hover, target, active, and focus.
 ## Usage
 Create configure script.
 
-```js:importer.js
+importer.js
+
+```js
 var SpriteMagicImporter = require('sprite-magic-importer');
 
 module.exports = SpriteMagicImporter({
@@ -96,7 +98,9 @@ module.exports = SpriteMagicImporter({
 });
 ```
 
-```js:build.js
+build.js
+
+```js
 var sass = require('node-sass');
 var importer = require('./importer');
 
