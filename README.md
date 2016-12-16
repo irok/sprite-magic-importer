@@ -9,7 +9,7 @@ Input
 
 .foo {
     .bar {
-        @include icons-sprite(firefox);
+        @include icons-sprite(chrome);
     }
 }
 ```
