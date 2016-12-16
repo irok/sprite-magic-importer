@@ -6,13 +6,19 @@ Input
 ```scss
 @import "icons/*.png";
 @include all-icons-sprites(true);
+
+.foo {
+    .bar {
+        @include icons-sprite(firefox, true);
+    }
+}
 ```
 
 Output
 
 ```css
-.icons-sprite, .icons-chrome, .icons-firefox, .icons-ie {
-  background-image: url("../images/icons.png?_=d25a48e");
+.icons-sprite, .icons-chrome, .icons-firefox, .icons-ie, .foo .bar {
+  background-image: url("/images/icons.png?_=bfa627d");
   background-repeat: no-repeat;
 }
 
@@ -24,8 +30,12 @@ Output
 
 ...snip...
 
-.icons-ie:hover, .icons-ie.ie-hover {
-  background-position: -64px 0;
+.foo .bar {
+  background-position: -32px 0;
+}
+
+.foo .bar:hover, .foo .bar.chrome-hover {
+  background-position: 0 0;
 }
 
 ```
@@ -68,14 +78,14 @@ module.exports = SpriteMagicImporter({
     // http://compass-style.org/help/documentation/configuration-reference/
     sass_dir:                   'src/sass',
     images_dir:                 'src/images',
-    generated_images_dir:       'htdocs/images',
-    http_stylesheets_path:      'css',
-    http_generated_images_path: 'images',
+    generated_images_dir:       'dist/images',
+    http_stylesheets_path:      '/css',
+    http_generated_images_path: '/images',
 
     // spritesmith options
     spritesmith: {
-        algorithm: `binary-tree`,
-        padding: 0
+        algorithm: `diagonal`,
+        padding: 2
     },
 
     // imagemin-pngquant options

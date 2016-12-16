@@ -9,7 +9,7 @@ $icons-image-width: 192px;
 $icons-image-height: 128px;
 
 #{$icons-sprite-base-class} {
-    background-image: url('../../images/foobar/icons@2x.png?_=903935c');
+    background-image: url('../../images/foobar/icons@2x.png?_=f5cc65e');
     background-repeat: no-repeat;
     @if $icons-pixel-ratio != 1 {
         background-size: #{$icons-image-width / $icons-pixel-ratio} #{$icons-image-height / $icons-pixel-ratio};
