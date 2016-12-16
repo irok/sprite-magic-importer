@@ -1,7 +1,7 @@
 {
   "name": "sprite-magic-importer",
   "description": "Custom node-sass importer for create CSS Sprites like Magic Imports of the Compass.",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "author": "irok",
   "bugs": {
     "url": "https://github.com/irok/sprite-magic-importer/issues"
