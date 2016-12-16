@@ -1,5 +1,6 @@
 .icons-sprite, .icons-chrome, .icons-firefox, .icons-ie {
-  background: url("../../images/foobar/icons.png?_=31a83d5") no-repeat;
+  background-image: url("../../images/foobar/icons.png?_=d25a48e");
+  background-repeat: no-repeat;
 }
 
 .icons-chrome {
@@ -34,31 +35,24 @@
 
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
   .icons-sprite, .icons-chrome, .icons-firefox, .icons-ie {
-    background: url("../../images/foobar/icons@2x.png?_=431fce5") no-repeat;
+    background-image: url("../../images/foobar/icons@2x.png?_=903935c");
+    background-repeat: no-repeat;
+    background-size: 96px 64px;
   }
   .icons-chrome {
     background-position: -32px 0;
-    background-size: 96px 64px;
-    width: 32px;
-    height: 32px;
   }
   .icons-chrome:hover, .icons-chrome.chrome-hover {
     background-position: 0 0;
   }
   .icons-firefox {
     background-position: -32px -32px;
-    background-size: 96px 64px;
-    width: 32px;
-    height: 32px;
   }
   .icons-firefox:hover, .icons-firefox.firefox-hover {
     background-position: 0 -32px;
   }
   .icons-ie {
     background-position: -64px -32px;
-    background-size: 96px 64px;
-    width: 32px;
-    height: 32px;
   }
   .icons-ie:hover, .icons-ie.ie-hover {
     background-position: -64px 0;

@@ -143,7 +143,7 @@ export default class SpriteMagic {
             }))
             .then(sprite => {
                 this.context.imageData = sprite.image;
-                this.context.sprite = sprite.properties;
+                this.context.imageProps = sprite.properties;
                 this.context.images.forEach(image => {
                     Object.assign(image, sprite.coordinates[image.filePath]);
                 });
@@ -166,28 +166,34 @@ export default class SpriteMagic {
         const sass = [];
 
         // variables
+        // core/stylesheets/compass/utilities/sprites/_base.scss
+        // compass/sprite_importer/content.erb
         sass.push(`
-            $disable-magic-sprite-selectors: false !default;
             $sprite-selectors: ${stateClasses.join(', ')} !default;
+            $disable-magic-sprite-selectors: false !default;
             $default-sprite-separator: '-' !default;
-            $${mapName}-sprite-base-class: '.${mapName}-sprite' !default;
             $${mapName}-sprite-dimensions: false !default;
             $${mapName}-class-separator: $default-sprite-separator !default;
+            $${mapName}-sprite-base-class: '.${mapName}#{$${mapName}-class-separator}sprite' !default;
             $${mapName}-pixel-ratio: ${this.context.pixelRatio};
-            $${mapName}-sprite-width: ${px(this.context.sprite.width)};
-            $${mapName}-sprite-height: ${px(this.context.sprite.height)};`
+            $${mapName}-image-width: ${px(this.context.imageProps.width)};
+            $${mapName}-image-height: ${px(this.context.imageProps.height)};`
         );
 
         // sprite image class
         sass.push(`
             #{$${mapName}-sprite-base-class} {
-                background: url('${this.spriteImageUrl()}?_=${hash}') no-repeat;
+                background-image: url('${this.spriteImageUrl()}?_=${hash}');
+                background-repeat: no-repeat;
+                @if $${mapName}-pixel-ratio != 1 {
+                    background-size: #{$${mapName}-image-width / $${mapName}-pixel-ratio} #{$${mapName}-image-height / $${mapName}-pixel-ratio};
+                }
             }`
         );
 
         // sprites data
         sass.push(`
-            $sprite-magic-${mapName}: (${
+            $${mapName}-sprites: (${
             selectors.map(image => `
                 ${image.name}: (
                     ${imageProps.map(prop => `${prop}: ${px(image[prop])}`).join(', ')}${
@@ -205,7 +211,7 @@ export default class SpriteMagic {
         // width and height function
         sass.push(...['width', 'height'].map(prop => `
             @function ${mapName}-sprite-${prop}($sprite) {
-                @return map-get(map-get($sprite-magic-${mapName}, $sprite), '${prop}');
+                @return map-get(map-get($${mapName}-sprites, $sprite), '${prop}');
             }`
         ));
 
@@ -232,7 +238,7 @@ export default class SpriteMagic {
                 $sprite-name, $full-sprite-name, $offset-x: 0, $offset-y: 0,
                 $unsupported: false, $separator: $${mapName}-class-separator
             ) {
-                $sprite-data: map-get($sprite-magic-${mapName}, $sprite-name);
+                $sprite-data: map-get($${mapName}-sprites, $sprite-name);
                 @each $state in $sprite-selectors {
                     @if map-has-key($sprite-data, $state) {
                         $sprite-class: "#{$full-sprite-name}#{$separator}#{$state}";
@@ -250,12 +256,9 @@ export default class SpriteMagic {
                 $sprite, $dimensions: $${mapName}-sprite-dimensions, $offset-x: 0, $offset-y: 0, $unsupported: false,
                 $use-magic-selectors: not $disable-magic-sprite-selectors, $separator: $${mapName}-class-separator
             ) {
-                $sprite-data: map-get($sprite-magic-${mapName}, $sprite);
+                $sprite-data: map-get($${mapName}-sprites, $sprite);
                 @extend #{$${mapName}-sprite-base-class};
                 @include sprite-magic-background-position($sprite-data, $offset-x, $offset-y);
-                @if $${mapName}-pixel-ratio != 1 {
-                    background-size: #{$${mapName}-sprite-width / $${mapName}-pixel-ratio} #{$${mapName}-sprite-height / $${mapName}-pixel-ratio}
-                }
                 @if $dimensions {
                     @include ${mapName}-sprite-dimensions($sprite);
                 }

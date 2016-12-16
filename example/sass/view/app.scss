@@ -3,5 +3,5 @@
 
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
     @import "foobar/icons/*@2x.png";
-    @include all-icons-sprites(true);
+    @include all-icons-sprites();
 }
