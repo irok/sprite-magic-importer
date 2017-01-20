@@ -164,6 +164,7 @@ export default class SpriteMagic {
         const { selectors, pseudoMap } = this.getSelectorInfo();
         const { mapName, hash } = this.context;
         const sass = [];
+        const placeholder = `%${mapName}-${hash}`;
 
         // variables
         // core/stylesheets/compass/utilities/sprites/_base.scss
@@ -182,12 +183,15 @@ export default class SpriteMagic {
 
         // sprite image class
         sass.push(`
-            #{$${mapName}-sprite-base-class} {
+            ${placeholder} {
                 background-image: url('${this.spriteImageUrl()}?_=${hash}');
                 background-repeat: no-repeat;
                 @if $${mapName}-pixel-ratio != 1 {
                     background-size: #{$${mapName}-image-width / $${mapName}-pixel-ratio} #{$${mapName}-image-height / $${mapName}-pixel-ratio};
                 }
+            }
+            #{$${mapName}-sprite-base-class} {
+                @extend ${placeholder};
             }`
         );
 
@@ -257,7 +261,7 @@ export default class SpriteMagic {
                 $use-magic-selectors: not $disable-magic-sprite-selectors, $separator: $${mapName}-class-separator
             ) {
                 $sprite-data: map-get($${mapName}-sprites, $sprite);
-                @extend #{$${mapName}-sprite-base-class};
+                @extend ${placeholder};
                 @include sprite-magic-background-position($sprite-data, $offset-x, $offset-y);
                 @if $dimensions {
                     @include ${mapName}-sprite-dimensions($sprite);
