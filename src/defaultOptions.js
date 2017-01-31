@@ -3,6 +3,7 @@ import path from 'path';
 
 const defaults = {
     project_path: process.cwd(),
+    base_uri: '',
     http_path: '/',
     sass_dir: 'sass',
     css_dir: 'stylesheets',
