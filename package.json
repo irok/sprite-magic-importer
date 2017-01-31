@@ -9,10 +9,10 @@
   "config": {
     "pre-git": {
       "pre-commit": [
-        "npm run build"
+        "yarn run build"
       ],
       "pre-push": [
-        "npm run lint"
+        "yarn run lint"
       ],
       "post-checkout": [
         "yarn"
