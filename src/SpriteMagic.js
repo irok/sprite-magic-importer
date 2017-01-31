@@ -29,6 +29,10 @@ export default class SpriteMagic {
     }
 
     resolve({ url, prev }) {
+        if (!/^_/.test(path.basename(prev))) {
+            this.rootSassFile = prev;
+        }
+
         if (!/\.png$/.test(url)) {
             return Promise.resolve();
         }
@@ -324,22 +328,24 @@ export default class SpriteMagic {
     }
 
     spriteImageUrl() {
-        const imageUrl = `${
+        const imagePath = `${
             path.dirname(path.normalize(path.join(
                 this.options.http_generated_images_path,
                 this.context.url
             )))
         }${this.context.suffix}.png`;
 
-        if (imageUrl[0] === path.sep) {
-            return imageUrl.replace(/\\/g, '/');
+        // absolute path
+        if (imagePath[0] === path.sep) {
+            return `${this.options.base_uri}${imagePath.replace(/\\/g, '/')}`;
         }
 
-        const cssUrlDir = path.dirname(path.join(
+        // relative path
+        const cssDir = path.dirname(path.normalize(path.join(
             this.options.http_stylesheets_path,
-            path.relative(this.options.sass_path, this.context.prev)
-        ));
-        return path.relative(cssUrlDir, imageUrl).replace(/\\/g, '/');
+            path.relative(this.options.sass_dir, this.rootSassFile)
+        )));
+        return path.relative(cssDir, imagePath).replace(/\\/g, '/');
     }
 
     spriteImagePath() {
