@@ -1,5 +1,5 @@
 .icons-sprite, .icons-chrome, .icons-firefox, .icons-ie {
-  background-image: url("../images/foobar/icons.png?_=7e3bf53");
+  background-image: url("../../images/foobar/icons.png?_=7e3bf53");
   background-repeat: no-repeat;
 }
 
@@ -35,7 +35,7 @@
 
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
   .icons-sprite, .icons-chrome, .icons-firefox, .icons-ie {
-    background-image: url("../images/foobar/icons@2x.png?_=c137301");
+    background-image: url("../../images/foobar/icons@2x.png?_=c137301");
     background-repeat: no-repeat;
     background-size: 96px 64px;
   }
