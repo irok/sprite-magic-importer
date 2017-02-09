@@ -112,22 +112,28 @@ export default class SpriteMagic {
     }
 
     checkCache() {
-        const latestMtime = Math.max(...this.context.images.map(image => image.mtime));
         const cacheFiles = [
             this.spriteImagePath(),
             this.spriteSassPath()
         ];
-        const hasNotChanged = file => new Promise((resolve, reject) => {
+
+        const getTimestamp = file => new Promise(resolve => {
             fs.stat(file, (err, stats) => {
-                if (err || stats.mtime.getTime() < latestMtime) {
-                    return reject();
-                }
-                return resolve();
+                resolve(err ? 0 : stats.mtime.getTime());
             });
         });
 
+        const hasNotChanged = ([tImg, tSass]) => new Promise((resolve, reject) => {
+            const latestMtime = Math.max(...this.context.images.map(image => image.mtime));
+            if (tSass === tImg && latestMtime <= tImg) {
+                return resolve();
+            }
+            return reject();
+        });
+
         return new Promise(resolve => {
-            Promise.all(cacheFiles.map(hasNotChanged))
+            Promise.all(cacheFiles.map(getTimestamp))
+                .then(hasNotChanged)
                 .then(() => {
                     this.context.hasCache = this.options.use_cache;
                     resolve();

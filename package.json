@@ -57,7 +57,7 @@
     "build:all": "npm run build && rm -rf example/.cache && npm run build:example",
     "build:example": "node-sass --importer example/importer.js --output-style expanded -o example/htdocs/css/view example/sass/view/app.scss",
     "commit": "commit-wizard",
-    "lint": "eslint src",
+    "lint": "eslint --fix src",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }
