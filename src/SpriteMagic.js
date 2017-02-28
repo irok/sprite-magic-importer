@@ -63,6 +63,7 @@ export default class SpriteMagic {
                 .then(() => this.outputSpriteImage())
                 .then(() => this.createSass())
                 .then(() => this.outputSassFile())
+                .then(() => this.changeTimestamp())
             ))
             .then(() => this.createResult());
     }
@@ -321,6 +322,20 @@ export default class SpriteMagic {
         return new Promise((...cb) => {
             fs.outputFile(this.spriteSassPath(), this.context.sass, cbResolver(cb));
         });
+    }
+
+    changeTimestamp() {
+        const cacheFiles = [
+            this.spriteImagePath(),
+            this.spriteSassPath()
+        ];
+
+        const now = Date.now() / 1000;
+        const setTimestamp = file => new Promise(resolve => {
+            fs.utimes(file, now, now, () => resolve());
+        });
+
+        return Promise.all(cacheFiles.map(setTimestamp));
     }
 
     createResult() {
