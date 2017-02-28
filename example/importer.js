@@ -8,5 +8,6 @@ module.exports = configure({
     generated_images_dir:       'example/htdocs/images',
     http_stylesheets_path:      'css',
     http_generated_images_path: 'images',
-    cache_dir:                  'example/.cache'
+    cache_dir:                  'example/.cache',
+    debug: true
 });
