@@ -17,7 +17,6 @@
     }
   },
   "dependencies": {
-    "crypto-js": "^3.1.8",
     "del": "^2.2.2",
     "fs-extra": "^1.0.0",
     "glob": "^7.1.1",

@@ -5,7 +5,7 @@ import path from 'path';
 import Spritesmith from 'spritesmith';
 import imagemin from 'imagemin';
 import pngquant from 'imagemin-pngquant';
-import Crypto from 'crypto-js';
+import crypto from 'crypto';
 import createOptions from './defaultOptions';
 
 const stateClasses = ['hover', 'target', 'active', 'focus'];
@@ -63,7 +63,6 @@ export default class SpriteMagic {
                 .then(() => this.outputSpriteImage())
                 .then(() => this.createSass())
                 .then(() => this.outputSassFile())
-                .then(() => this.createCacheData())
             ))
             .then(() => this.createResult());
     }
@@ -120,7 +119,7 @@ export default class SpriteMagic {
             .concat(JSON.stringify(this.options))
             .concat(require('../package.json').version)     // eslint-disable-line global-require
             .join('\0');
-        this.context.hash = Crypto.SHA1(fingerprint).toString(Crypto.enc.HEX).substr(0, 7);
+        this.context.hash = crypto.createHash('sha256').update(fingerprint).digest('hex').substr(0, 7);
         this.debug(`hash: ${this.context.hash}`);
     }
 
@@ -136,7 +135,7 @@ export default class SpriteMagic {
         const checkImageHash = data => new Promise((resolve, reject) => {
             fs.readFile(this.spriteImagePath(), (err, image) => {
                 if (!err) {
-                    const hash = Crypto.SHA1(image).toString(Crypto.enc.HEX);
+                    const hash = crypto.createHash('sha256').update(image).digest('hex');
                     if (hash === data.hash) {
                         return resolve();
                     }
@@ -190,7 +189,14 @@ export default class SpriteMagic {
                 use: [pngquant(this.options.pngquant)]
             }))
             .then(buf => new Promise((...cb) => {
+                this.context.imageHash = crypto.createHash('sha256').update(buf).digest('hex');
                 fs.outputFile(this.spriteImagePath(), buf, cbResolver(cb));
+            }))
+            .then(() => new Promise((...cb) => {
+                const data = JSON.stringify({
+                    hash: this.context.imageHash
+                });
+                fs.outputFile(this.spriteCacheDataPath(), data, cbResolver(cb));
             }));
     }
 
@@ -326,23 +332,6 @@ export default class SpriteMagic {
         return new Promise((...cb) => {
             fs.outputFile(this.spriteSassPath(), this.context.sass, cbResolver(cb));
         });
-    }
-
-    createCacheData() {
-        const readSpriteImage = () => new Promise((...cb) => {
-            fs.readFile(this.spriteImagePath(), cbResolver(cb));
-        });
-
-        const createHash = image => Crypto.SHA1(image).toString(Crypto.enc.HEX);
-
-        const writeCacheData = hash => new Promise((...cb) => {
-            fs.writeJson(this.spriteCacheDataPath(), { hash }, cbResolver(cb));
-        });
-
-        return Promise.resolve()
-            .then(readSpriteImage)
-            .then(createHash)
-            .then(writeCacheData);
     }
 
     createResult() {
