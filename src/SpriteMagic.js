@@ -63,7 +63,7 @@ export default class SpriteMagic {
                 .then(() => this.outputSpriteImage())
                 .then(() => this.createSass())
                 .then(() => this.outputSassFile())
-                .then(() => this.changeTimestamp())
+                .then(() => this.createCacheData())
             ))
             .then(() => this.createResult());
     }
@@ -125,28 +125,32 @@ export default class SpriteMagic {
     }
 
     checkCache() {
-        const cacheFiles = [
-            this.spriteImagePath(),
-            this.spriteSassPath()
-        ];
+        const checkCacheSass = () => new Promise((...cb) => {
+            fs.access(this.spriteSassPath(), cbResolver(cb));
+        });
 
-        const getTimestamp = file => new Promise(resolve => {
-            fs.stat(file, (err, stats) => {
-                resolve(err ? 0 : stats.mtime.getTime());
+        const readCacheData = () => new Promise((...cb) => {
+            fs.readJson(this.spriteCacheDataPath(), cbResolver(cb));
+        });
+
+        const checkImageHash = data => new Promise((resolve, reject) => {
+            fs.readFile(this.spriteImagePath(), (err, image) => {
+                if (!err) {
+                    const hash = Crypto.SHA1(image).toString(Crypto.enc.HEX);
+                    if (hash === data.hash) {
+                        return resolve();
+                    }
+                }
+                return reject();
             });
         });
 
-        const hasNotChanged = ([tImg, tSass]) => new Promise((resolve, reject) => {
-            this.debug(`mtime: img=${tImg}, sass=${tSass}`);
-            if (tSass === tImg) {
-                return resolve();
-            }
-            return reject();
-        });
-
+        // always resolved
         return new Promise(resolve => {
-            Promise.all(cacheFiles.map(getTimestamp))
-                .then(hasNotChanged)
+            Promise.resolve()
+                .then(checkCacheSass)
+                .then(readCacheData)
+                .then(checkImageHash)
                 .then(() => {
                     this.context.hasCache = this.options.use_cache;
                     this.debug(`Find cache! (${this.context.hasCache})`);
@@ -324,18 +328,21 @@ export default class SpriteMagic {
         });
     }
 
-    changeTimestamp() {
-        const cacheFiles = [
-            this.spriteImagePath(),
-            this.spriteSassPath()
-        ];
-
-        const now = Date.now() / 1000;
-        const setTimestamp = file => new Promise(resolve => {
-            fs.utimes(file, now, now, () => resolve());
+    createCacheData() {
+        const readSpriteImage = () => new Promise((...cb) => {
+            fs.readFile(this.spriteImagePath(), cbResolver(cb));
         });
 
-        return Promise.all(cacheFiles.map(setTimestamp));
+        const createHash = image => Crypto.SHA1(image).toString(Crypto.enc.HEX);
+
+        const writeCacheData = hash => new Promise((...cb) => {
+            fs.writeJson(this.spriteCacheDataPath(), { hash }, cbResolver(cb));
+        });
+
+        return Promise.resolve()
+            .then(readSpriteImage)
+            .then(createHash)
+            .then(writeCacheData);
     }
 
     createResult() {
@@ -398,8 +405,16 @@ export default class SpriteMagic {
         return `${imageFileBase}${this.context.suffix}.png`;
     }
 
+    spriteCacheDataPath() {
+        return this.spriteCachePath('json');
+    }
+
     spriteSassPath() {
-        const fileName = `${this.context.mapName}${this.context.suffix}-${this.context.hash}.scss`;
+        return this.spriteCachePath('scss');
+    }
+
+    spriteCachePath(ext) {
+        const fileName = `${this.context.mapName}${this.context.suffix}-${this.context.hash}.${ext}`;
         return path.resolve(this.options.cache_dir, fileName);
     }
 
