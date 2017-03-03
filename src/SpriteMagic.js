@@ -113,7 +113,7 @@ export default class SpriteMagic {
 
     createHash() {
         const fingerprint = this.context.images
-            .map(image => `${image.filePath}#${image.size}`)
+            .map(image => `${this.projectRelPath(image.filePath)}#${image.size}`)
             .concat(JSON.stringify(this.options))
             .concat(require('../package.json').version)     // eslint-disable-line global-require
             .join('\0');
@@ -312,11 +312,7 @@ export default class SpriteMagic {
 
     createResult() {
         if (!this.context.hasCache) {
-            const spriteFilePath = path.relative(
-                this.options.project_path,
-                this.spriteImagePath()
-            );
-            // eslint-disable-next-line no-console
+            const spriteFilePath = this.projectRelPath(this.spriteImagePath());
             console.info(`Create CSS Sprites: ${spriteFilePath}#${this.context.hash}`);
         }
 
@@ -381,6 +377,10 @@ export default class SpriteMagic {
     spriteCachePath(ext) {
         const fileName = `${this.context.mapName}${this.context.suffix}-${this.context.hash}.${ext}`;
         return path.resolve(this.options.cache_dir, fileName);
+    }
+
+    projectRelPath(filePath) {
+        return path.relative(this.options.project_path, filePath).replace(/\\/g, '/');
     }
 
     commonName(name) {
