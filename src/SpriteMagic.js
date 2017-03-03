@@ -1,27 +1,20 @@
-import fs from 'fs-extra';
 import del from 'del';
-import glob from 'glob';
 import path from 'path';
-import Spritesmith from 'spritesmith';
 import imagemin from 'imagemin';
 import pngquant from 'imagemin-pngquant';
 import crypto from 'crypto';
 import createOptions from './defaultOptions';
+import Promisable from './Promisable';
+
+const fs = Promisable.require('fs-extra');
+const globAsync = Promisable.require('glob', true);
+const Spritesmith = Promisable.require('Spritesmith');
 
 const stateClasses = ['hover', 'target', 'active', 'focus'];
 const imageProps = ['x', 'y', 'width', 'height'];
 
 function px(value) {
     return value === 0 ? '0' : `${value}px`;
-}
-
-function cbResolver([resolve, reject], success = x => x) {
-    return (err, result) => {
-        if (err) {
-            return reject(err);
-        }
-        return resolve(success(result));
-    };
 }
 
 function isPartialFile(prev) {
@@ -89,16 +82,10 @@ export default class SpriteMagic {
     }
 
     getImagesInfo() {
-        const src = path.resolve(this.options.images_path, this.context.url);
-
-        return Promise.resolve()
-            .then(() => new Promise((...cb) => {
-                glob(src, cbResolver(cb));
-            }))
+        return Promise.resolve(path.resolve(this.options.images_path, this.context.url))
+            .then(globAsync)
             .then(matches => Promise.all(matches.map(
-                filePath => new Promise((...cb) => {
-                    fs.stat(filePath, cbResolver(cb, stats => ({ filePath, stats })));
-                })
+                filePath => fs.statAsync(filePath).then(stats => ({ filePath, stats }))
             )))
             .then(images => images.map(image => this.createImageInfo(image)))
             .then(images => {
@@ -132,32 +119,16 @@ export default class SpriteMagic {
     }
 
     checkCache() {
-        const checkCacheSass = () => new Promise((...cb) => {
-            fs.access(this.spriteSassPath(), cbResolver(cb));
-        });
-
-        const readCacheData = () => new Promise((...cb) => {
-            fs.readJson(this.spriteCacheDataPath(), cbResolver(cb));
-        });
-
-        const checkImageHash = data => new Promise((resolve, reject) => {
-            fs.readFile(this.spriteImagePath(), (err, image) => {
-                if (!err) {
-                    const hash = crypto.createHash('sha256').update(image).digest('hex');
-                    if (hash === data.hash) {
-                        return resolve();
-                    }
-                }
-                return reject();
-            });
-        });
-
         // always resolved
+        let imageHash;
         return new Promise(resolve => {
             Promise.resolve()
-                .then(checkCacheSass)
-                .then(readCacheData)
-                .then(checkImageHash)
+                .then(() => fs.accessAsync(this.spriteSassPath()))
+                .then(() => fs.readJsonAsync(this.spriteCacheDataPath()))
+                .then(data => { imageHash = data.hash; })
+                .then(() => fs.readFileAsync(this.spriteImagePath()))
+                .then(image => crypto.createHash('sha256').update(image).digest('hex'))
+                .then(hash => hash === imageHash ? Promise.resolve() : Promise.reject())
                 .then(() => {
                     this.context.hasCache = this.options.use_cache;
                     this.debug(`Find cache! (${this.context.hasCache})`);
@@ -179,9 +150,7 @@ export default class SpriteMagic {
         });
 
         return Promise.resolve()
-            .then(() => new Promise((...cb) => {
-                Spritesmith.run(options, cbResolver(cb));
-            }))
+            .then(() => Spritesmith.runAsync(options))
             .then(sprite => {
                 this.context.imageData = sprite.image;
                 this.context.imageProps = sprite.properties;
@@ -196,16 +165,14 @@ export default class SpriteMagic {
             .then(() => imagemin.buffer(this.context.imageData, {
                 use: [pngquant(this.options.pngquant)]
             }))
-            .then(buf => new Promise((...cb) => {
+            .then(buf => {
                 this.context.imageHash = crypto.createHash('sha256').update(buf).digest('hex');
-                fs.outputFile(this.spriteImagePath(), buf, cbResolver(cb));
-            }))
-            .then(() => new Promise((...cb) => {
-                const data = JSON.stringify({
-                    hash: this.context.imageHash
-                });
-                fs.outputFile(this.spriteCacheDataPath(), `${data}\n`, cbResolver(cb));
-            }));
+                return fs.outputFileAsync(this.spriteImagePath(), buf);
+            })
+            .then(() => {
+                const data = JSON.stringify({hash: this.context.imageHash});
+                return fs.outputFileAsync(this.spriteCacheDataPath(), `${data}\n`);
+            });
     }
 
     createSass() {
@@ -337,9 +304,7 @@ export default class SpriteMagic {
     }
 
     outputSassFile() {
-        return new Promise((...cb) => {
-            fs.outputFile(this.spriteSassPath(), this.context.sass, cbResolver(cb));
-        });
+        return fs.outputFileAsync(this.spriteSassPath(), this.context.sass);
     }
 
     createResult() {

@@ -8,15 +8,15 @@ $icons-pixel-ratio: 1;
 $icons-image-width: 96px;
 $icons-image-height: 64px;
 
-%icons-b3bf54d {
-    background-image: url('../../images/foobar/icons.png?_=b3bf54d');
+%icons-046981a {
+    background-image: url('../../images/foobar/icons.png?_=046981a');
     background-repeat: no-repeat;
     @if $icons-pixel-ratio != 1 {
         background-size: #{$icons-image-width / $icons-pixel-ratio} #{$icons-image-height / $icons-pixel-ratio};
     }
 }
 #{$icons-sprite-base-class} {
-    @extend %icons-b3bf54d;
+    @extend %icons-046981a;
 }
 
 $icons-sprites: (
@@ -70,7 +70,7 @@ $icons-sprites: (
     $use-magic-selectors: not $disable-magic-sprite-selectors, $separator: $icons-class-separator
 ) {
     $sprite-data: map-get($icons-sprites, $sprite);
-    @extend %icons-b3bf54d;
+    @extend %icons-046981a;
     @include sprite-magic-background-position($sprite-data, $offset-x, $offset-y);
     @if $dimensions {
         @include icons-sprite-dimensions($sprite);
