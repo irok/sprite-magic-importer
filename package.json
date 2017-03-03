@@ -54,7 +54,7 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "build:all": "npm run build && rm -rf example/.cache && npm run build:example",
+    "build:all": "yarn run build && rm -rf example/.cache && yarn run build:example",
     "build:example": "node-sass --importer example/importer.js --output-style expanded -o example/htdocs/css/view example/sass/view/app.scss",
     "commit": "commit-wizard",
     "lint": "eslint --fix src",

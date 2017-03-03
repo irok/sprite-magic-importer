@@ -24,6 +24,14 @@ function cbResolver([resolve, reject], success = x => x) {
     };
 }
 
+function isPartialFile(prev) {
+    return (
+        /^_/.test(path.basename(prev)) ||
+        /\/_/.test(prev.replace(/\\/g, '/'))
+    );
+}
+
+
 export default class SpriteMagic {
     constructor(options) {
         this.options = createOptions(options);
@@ -36,9 +44,9 @@ export default class SpriteMagic {
     }
 
     resolve({ url, prev }) {
-        if (!/^_/.test(path.basename(prev))) {
-            this.debug(`Find root: ${prev}`);
+        if (!isPartialFile(prev) && this.rootSassFile !== prev) {
             this.rootSassFile = prev;
+            this.debug(`Find root: ${prev}`);
         }
 
         if (!/\.png$/.test(url)) {
@@ -196,7 +204,7 @@ export default class SpriteMagic {
                 const data = JSON.stringify({
                     hash: this.context.imageHash
                 });
-                fs.outputFile(this.spriteCacheDataPath(), data, cbResolver(cb));
+                fs.outputFile(this.spriteCacheDataPath(), `${data}\n`, cbResolver(cb));
             }));
     }
 
