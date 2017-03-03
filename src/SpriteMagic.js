@@ -1,14 +1,17 @@
+import crypto from 'crypto';
 import del from 'del';
+import _fs from 'fs-extra';
+import glob from 'glob';
 import path from 'path';
+import _Spritesmith from 'spritesmith';
 import imagemin from 'imagemin';
 import pngquant from 'imagemin-pngquant';
-import crypto from 'crypto';
 import createOptions from './defaultOptions';
 import Promisable from './Promisable';
 
-const fs = Promisable.require('fs-extra');
-const globAsync = Promisable.require('glob', true);
-const Spritesmith = Promisable.require('Spritesmith');
+const fs = Promisable.attach(_fs);
+const globAsync = Promisable.create(glob);
+const Spritesmith = Promisable.attach(_Spritesmith);
 
 const stateClasses = ['hover', 'target', 'active', 'focus'];
 const imageProps = ['x', 'y', 'width', 'height'];
@@ -128,7 +131,7 @@ export default class SpriteMagic {
                 .then(data => { imageHash = data.hash; })
                 .then(() => fs.readFileAsync(this.spriteImagePath()))
                 .then(image => crypto.createHash('sha256').update(image).digest('hex'))
-                .then(hash => hash === imageHash ? Promise.resolve() : Promise.reject())
+                .then(hash => (hash === imageHash ? Promise.resolve() : Promise.reject()))
                 .then(() => {
                     this.context.hasCache = this.options.use_cache;
                     this.debug(`Find cache! (${this.context.hasCache})`);
@@ -170,7 +173,7 @@ export default class SpriteMagic {
                 return fs.outputFileAsync(this.spriteImagePath(), buf);
             })
             .then(() => {
-                const data = JSON.stringify({hash: this.context.imageHash});
+                const data = JSON.stringify({ hash: this.context.imageHash });
                 return fs.outputFileAsync(this.spriteCacheDataPath(), `${data}\n`);
             });
     }

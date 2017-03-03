@@ -9,7 +9,8 @@ const create = (thisArg, fn) => (...args) => new Promise((resolve, reject) => {
     fn.apply(thisArg, args);
 });
 
-const get = (target, name, receiver) => {
+const get = (target, property, receiver) => {
+    let name = property;
     if (/Async$/.test(name) && !Reflect.has(target, name, receiver)) {
         name = name.replace(/Async$/, '');
 
@@ -22,15 +23,8 @@ const get = (target, name, receiver) => {
 };
 
 const Promisable = {
-    require(name, isFunc = false) {
-        var obj = require(name);
-        if (isFunc) {
-            return Promisable.create(obj);
-        }
-        return Promisable.attach(obj);
-    },
     attach(obj) {
-        return new Proxy(obj, {get});
+        return new Proxy(obj, { get });
     },
     create(fn, thisArg) {
         return create(thisArg, fn);
