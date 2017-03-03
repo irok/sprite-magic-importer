@@ -27,6 +27,9 @@ function isPartialFile(prev) {
     );
 }
 
+function createDigest(data) {
+    return crypto.createHash('sha256').update(data).digest('hex');
+}
 
 export default class SpriteMagic {
     constructor(options) {
@@ -87,10 +90,7 @@ export default class SpriteMagic {
     getImagesInfo() {
         return Promise.resolve(path.resolve(this.options.images_path, this.context.url))
             .then(globAsync)
-            .then(matches => Promise.all(matches.map(
-                filePath => fs.statAsync(filePath).then(stats => ({ filePath, stats }))
-            )))
-            .then(images => images.map(image => this.createImageInfo(image)))
+            .then(matches => matches.map(filePath => this.createImageInfo(filePath)))
             .then(images => {
                 if (this.context.pixelRatio === 1) {
                     this.context.images = images.filter(image => image.name === image.basename);
@@ -100,25 +100,23 @@ export default class SpriteMagic {
             });
     }
 
-    createImageInfo(image) {
-        const basename = path.basename(image.filePath, '.png');
-
-        return {
-            filePath: image.filePath,
-            basename,
-            name: this.commonName(basename),
-            size: image.stats.size
-        };
+    createImageInfo(filePath) {
+        const basename = path.basename(filePath, '.png');
+        const name = this.commonName(basename);
+        return { filePath, basename, name };
     }
 
     createHash() {
-        const fingerprint = this.context.images
-            .map(image => `${this.projectRelPath(image.filePath)}#${image.size}`)
-            .concat(JSON.stringify(this.options))
-            .concat(require('../package.json').version)     // eslint-disable-line global-require
-            .join('\0');
-        this.context.hash = crypto.createHash('sha256').update(fingerprint).digest('hex').substr(0, 7);
-        this.debug(`hash: ${this.context.hash}`);
+        return Promise.all(this.context.images.map(image =>
+            fs.readFileAsync(image.filePath)
+                .then(createDigest)
+                .then(hash => [this.projectRelPath(image.filePath), hash])
+        ))
+        .then(results => {
+            this.context.fingerprint = JSON.stringify(results);
+            this.context.hash = createDigest(this.context.fingerprint).substr(0, 7);
+            this.debug(`hash: ${this.context.hash}`);
+        });
     }
 
     checkCache() {
@@ -128,9 +126,9 @@ export default class SpriteMagic {
             Promise.resolve()
                 .then(() => fs.accessAsync(this.spriteSassPath()))
                 .then(() => fs.readJsonAsync(this.spriteCacheDataPath()))
-                .then(data => { imageHash = data.hash; })
+                .then(data => { imageHash = data.imageHash; })
                 .then(() => fs.readFileAsync(this.spriteImagePath()))
-                .then(image => crypto.createHash('sha256').update(image).digest('hex'))
+                .then(createDigest)
                 .then(hash => (hash === imageHash ? Promise.resolve() : Promise.reject()))
                 .then(() => {
                     this.context.hasCache = this.options.use_cache;
@@ -169,11 +167,14 @@ export default class SpriteMagic {
                 use: [pngquant(this.options.pngquant)]
             }))
             .then(buf => {
-                this.context.imageHash = crypto.createHash('sha256').update(buf).digest('hex');
+                this.context.imageHash = createDigest(buf);
                 return fs.outputFileAsync(this.spriteImagePath(), buf);
             })
             .then(() => {
-                const data = JSON.stringify({ hash: this.context.imageHash });
+                const data = JSON.stringify({
+                    fingerprint: this.context.fingerprint,
+                    imageHash: this.context.imageHash
+                });
                 return fs.outputFileAsync(this.spriteCacheDataPath(), `${data}\n`);
             });
     }

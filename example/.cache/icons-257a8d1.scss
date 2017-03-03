@@ -4,30 +4,30 @@ $default-sprite-separator: '-' !default;
 $icons-sprite-dimensions: false !default;
 $icons-class-separator: $default-sprite-separator !default;
 $icons-sprite-base-class: '.icons#{$icons-class-separator}sprite' !default;
-$icons-pixel-ratio: 2;
-$icons-image-width: 192px;
-$icons-image-height: 128px;
+$icons-pixel-ratio: 1;
+$icons-image-width: 96px;
+$icons-image-height: 64px;
 
-%icons-f5ccddc {
-    background-image: url('../../images/foobar/icons@2x.png?_=f5ccddc');
+%icons-257a8d1 {
+    background-image: url('../../images/foobar/icons.png?_=257a8d1');
     background-repeat: no-repeat;
     @if $icons-pixel-ratio != 1 {
         background-size: #{$icons-image-width / $icons-pixel-ratio} #{$icons-image-height / $icons-pixel-ratio};
     }
 }
 #{$icons-sprite-base-class} {
-    @extend %icons-f5ccddc;
+    @extend %icons-257a8d1;
 }
 
 $icons-sprites: (
     chrome: (
-        x: 64px, y: 0, width: 64px, height: 64px, hover: (x: 0, y: 0, width: 64px, height: 64px)
+        x: 32px, y: 0, width: 32px, height: 32px, hover: (x: 0, y: 0, width: 32px, height: 32px)
     ),
     firefox: (
-        x: 64px, y: 64px, width: 64px, height: 64px, hover: (x: 0, y: 64px, width: 64px, height: 64px)
+        x: 32px, y: 32px, width: 32px, height: 32px, hover: (x: 0, y: 32px, width: 32px, height: 32px)
     ),
     ie: (
-        x: 128px, y: 64px, width: 64px, height: 64px, hover: (x: 128px, y: 0, width: 64px, height: 64px)
+        x: 64px, y: 32px, width: 32px, height: 32px, hover: (x: 64px, y: 0, width: 32px, height: 32px)
     )
 );
 
@@ -70,7 +70,7 @@ $icons-sprites: (
     $use-magic-selectors: not $disable-magic-sprite-selectors, $separator: $icons-class-separator
 ) {
     $sprite-data: map-get($icons-sprites, $sprite);
-    @extend %icons-f5ccddc;
+    @extend %icons-257a8d1;
     @include sprite-magic-background-position($sprite-data, $offset-x, $offset-y);
     @if $dimensions {
         @include icons-sprite-dimensions($sprite);
