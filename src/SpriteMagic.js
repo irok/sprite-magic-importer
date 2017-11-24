@@ -360,7 +360,7 @@ export default class SpriteMagic {
     spriteImagePath() {
         const imageFileBase = path.dirname(
             path.resolve(
-                this.options.generated_images_dir,
+                this.options.generated_images_path,
                 this.context.url
             )
         );
