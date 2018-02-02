@@ -248,7 +248,7 @@ export default class SpriteMagic {
 
         // background position mixin
         sass.push(`
-            @mixin sprite-magic-background-position($sprite-data, $offset-x: 0, $offset-y: 0) {
+            @mixin ${mapName}-sprite-magic-background-position($sprite-data, $offset-x: 0, $offset-y: 0) {
                 $x: $offset-x - map-get($sprite-data, 'x');
                 $y: $offset-y - map-get($sprite-data, 'y');
                 background-position: #{$x / $${mapName}-pixel-ratio} #{$y / $${mapName}-pixel-ratio};
@@ -266,7 +266,7 @@ export default class SpriteMagic {
                     @if map-has-key($sprite-data, $state) {
                         $sprite-class: "#{$full-sprite-name}#{$separator}#{$state}";
                         &:#{$state}, &.#{$sprite-class} {
-                            @include sprite-magic-background-position(map-get($sprite-data, $state), $offset-x, $offset-y);
+                            @include ${mapName}-sprite-magic-background-position(map-get($sprite-data, $state), $offset-x, $offset-y);
                         }
                     }
                 }
@@ -281,7 +281,7 @@ export default class SpriteMagic {
             ) {
                 $sprite-data: map-get($${mapName}-sprites, $sprite);
                 @extend ${placeholder};
-                @include sprite-magic-background-position($sprite-data, $offset-x, $offset-y);
+                @include ${mapName}-sprite-magic-background-position($sprite-data, $offset-x, $offset-y);
                 @if $dimensions {
                     @include ${mapName}-sprite-dimensions($sprite);
                 }

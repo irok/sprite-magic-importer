@@ -44,7 +44,7 @@ $icons-sprites: (
     height: #{icons-sprite-height($sprite) / $icons-pixel-ratio};
 }
 
-@mixin sprite-magic-background-position($sprite-data, $offset-x: 0, $offset-y: 0) {
+@mixin icons-sprite-magic-background-position($sprite-data, $offset-x: 0, $offset-y: 0) {
     $x: $offset-x - map-get($sprite-data, 'x');
     $y: $offset-y - map-get($sprite-data, 'y');
     background-position: #{$x / $icons-pixel-ratio} #{$y / $icons-pixel-ratio};
@@ -59,7 +59,7 @@ $icons-sprites: (
         @if map-has-key($sprite-data, $state) {
             $sprite-class: "#{$full-sprite-name}#{$separator}#{$state}";
             &:#{$state}, &.#{$sprite-class} {
-                @include sprite-magic-background-position(map-get($sprite-data, $state), $offset-x, $offset-y);
+                @include icons-sprite-magic-background-position(map-get($sprite-data, $state), $offset-x, $offset-y);
             }
         }
     }
@@ -71,7 +71,7 @@ $icons-sprites: (
 ) {
     $sprite-data: map-get($icons-sprites, $sprite);
     @extend %icons-257a8d1;
-    @include sprite-magic-background-position($sprite-data, $offset-x, $offset-y);
+    @include icons-sprite-magic-background-position($sprite-data, $offset-x, $offset-y);
     @if $dimensions {
         @include icons-sprite-dimensions($sprite);
     }
