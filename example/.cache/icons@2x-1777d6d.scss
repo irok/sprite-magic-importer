@@ -32,16 +32,16 @@ $icons-sprites: (
 );
 
 @function icons-sprite-width($sprite) {
-    @return map-get(map-get($icons-sprites, $sprite), 'width');
+    @return map-get(map-get($icons-sprites, $sprite), 'width') / $icons-pixel-ratio;
 }
 
 @function icons-sprite-height($sprite) {
-    @return map-get(map-get($icons-sprites, $sprite), 'height');
+    @return map-get(map-get($icons-sprites, $sprite), 'height') / $icons-pixel-ratio;
 }
 
 @mixin icons-sprite-dimensions($sprite) {
-    width: #{icons-sprite-width($sprite) / $icons-pixel-ratio};
-    height: #{icons-sprite-height($sprite) / $icons-pixel-ratio};
+    width: icons-sprite-width($sprite);
+    height: icons-sprite-height($sprite);
 }
 
 @mixin icons-sprite-magic-background-position($sprite-data, $offset-x: 0, $offset-y: 0) {
