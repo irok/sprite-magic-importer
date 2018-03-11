@@ -234,15 +234,15 @@ export default class SpriteMagic {
         // width and height function
         sass.push(...['width', 'height'].map(prop => `
             @function ${mapName}-sprite-${prop}($sprite) {
-                @return map-get(map-get($${mapName}-sprites, $sprite), '${prop}');
+                @return map-get(map-get($${mapName}-sprites, $sprite), '${prop}') / $${mapName}-pixel-ratio;
             }`
         ));
 
         // dimensions mixin
         sass.push(`
             @mixin ${mapName}-sprite-dimensions($sprite) {
-                width: #{${mapName}-sprite-width($sprite) / $${mapName}-pixel-ratio};
-                height: #{${mapName}-sprite-height($sprite) / $${mapName}-pixel-ratio};
+                width: ${mapName}-sprite-width($sprite);
+                height: ${mapName}-sprite-height($sprite);
             }`
         );
 
