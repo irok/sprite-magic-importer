@@ -325,9 +325,8 @@ export default class SpriteMagic {
             if (regex.test(image.name)) {
                 const { $1: imageName, $2: pseudoClass } = RegExp;
                 (pseudoMap[imageName] || (pseudoMap[imageName] = {}))[pseudoClass] = image;
-            } else {
-                selectors.push(image);
             }
+            selectors.push(image);
         });
 
         return { selectors, pseudoMap };
