@@ -1,6 +1,12 @@
-.icons-sprite, .icons-chrome, .icons-firefox, .icons-ie {
+.icons-sprite, .icons-chrome-hover, .icons-chrome, .icons-firefox-hover, .icons-firefox, .icons-ie-hover, .icons-ie {
   background-image: url("../../images/foobar/icons.png?_=257a8d1");
   background-repeat: no-repeat;
+}
+
+.icons-chrome-hover {
+  background-position: 0 0;
+  width: 32px;
+  height: 32px;
 }
 
 .icons-chrome {
@@ -13,6 +19,12 @@
   background-position: 0 0;
 }
 
+.icons-firefox-hover {
+  background-position: 0 -32px;
+  width: 32px;
+  height: 32px;
+}
+
 .icons-firefox {
   background-position: -32px -32px;
   width: 32px;
@@ -21,6 +33,12 @@
 
 .icons-firefox:hover, .icons-firefox.firefox-hover {
   background-position: 0 -32px;
+}
+
+.icons-ie-hover {
+  background-position: -64px 0;
+  width: 32px;
+  height: 32px;
 }
 
 .icons-ie {
@@ -34,10 +52,13 @@
 }
 
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
-  .icons-sprite, .icons-chrome, .icons-firefox, .icons-ie {
+  .icons-sprite, .icons-chrome-hover, .icons-chrome, .icons-firefox-hover, .icons-firefox, .icons-ie-hover, .icons-ie {
     background-image: url("../../images/foobar/icons@2x.png?_=1777d6d");
     background-repeat: no-repeat;
     background-size: 96px 64px;
+  }
+  .icons-chrome-hover {
+    background-position: 0 0;
   }
   .icons-chrome {
     background-position: -32px 0;
@@ -45,11 +66,17 @@
   .icons-chrome:hover, .icons-chrome.chrome-hover {
     background-position: 0 0;
   }
+  .icons-firefox-hover {
+    background-position: 0 -32px;
+  }
   .icons-firefox {
     background-position: -32px -32px;
   }
   .icons-firefox:hover, .icons-firefox.firefox-hover {
     background-position: 0 -32px;
+  }
+  .icons-ie-hover {
+    background-position: -64px 0;
   }
   .icons-ie {
     background-position: -64px -32px;
