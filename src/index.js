@@ -1,6 +1,6 @@
 import SpriteMagic from './SpriteMagic';
 
-export default (options = {}) => {
+export default Object.assign((options = {}) => {
     const spriteMagic = new SpriteMagic(options);
 
     return (url, prev, done) => {
@@ -8,4 +8,4 @@ export default (options = {}) => {
             .then(done)
             .catch(err => setImmediate(() => { throw err; }));
     };
-};
+}, { SpriteMagic });

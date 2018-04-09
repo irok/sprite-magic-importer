@@ -20,11 +20,20 @@ $icons-image-height: 64px;
 }
 
 $icons-sprites: (
+    chrome-hover: (
+        x: 0, y: 0, width: 32px, height: 32px
+    ),
     chrome: (
         x: 32px, y: 0, width: 32px, height: 32px, hover: (x: 0, y: 0, width: 32px, height: 32px)
     ),
+    firefox-hover: (
+        x: 0, y: 32px, width: 32px, height: 32px
+    ),
     firefox: (
         x: 32px, y: 32px, width: 32px, height: 32px, hover: (x: 0, y: 32px, width: 32px, height: 32px)
+    ),
+    ie-hover: (
+        x: 64px, y: 0, width: 32px, height: 32px
     ),
     ie: (
         x: 64px, y: 32px, width: 32px, height: 32px, hover: (x: 64px, y: 0, width: 32px, height: 32px)
@@ -83,11 +92,20 @@ $icons-sprites: (
 }
 
 @mixin all-icons-sprites($dimensions: $icons-sprite-dimensions) {
+    .icons-chrome-hover {
+        @include icons-sprite(chrome-hover, $dimensions);
+    }
     .icons-chrome {
         @include icons-sprite(chrome, $dimensions);
     }
+    .icons-firefox-hover {
+        @include icons-sprite(firefox-hover, $dimensions);
+    }
     .icons-firefox {
         @include icons-sprite(firefox, $dimensions);
+    }
+    .icons-ie-hover {
+        @include icons-sprite(ie-hover, $dimensions);
     }
     .icons-ie {
         @include icons-sprite(ie, $dimensions);

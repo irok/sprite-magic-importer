@@ -20,18 +20,15 @@ function px(value) {
     return value === 0 ? '0' : `${value}px`;
 }
 
-function isPartialFile(prev) {
-    return (
-        /^_/.test(path.basename(prev)) ||
-        /\/_/.test(prev.replace(/\\/g, '/'))
-    );
-}
-
 function createDigest(data) {
     return crypto.createHash('sha256').update(data).digest('hex');
 }
 
 export default class SpriteMagic {
+    static isPartialFile(prev) {
+        return /^_/.test(path.basename(prev));
+    }
+
     constructor(options) {
         this.options = createOptions(options);
     }
@@ -43,7 +40,7 @@ export default class SpriteMagic {
     }
 
     resolve({ url, prev }) {
-        if (!isPartialFile(prev) && this.rootSassFile !== prev) {
+        if (!SpriteMagic.isPartialFile(prev) && this.rootSassFile !== prev) {
             this.rootSassFile = prev;
             this.debug(`Find root: ${prev}`);
         }
@@ -328,9 +325,8 @@ export default class SpriteMagic {
             if (regex.test(image.name)) {
                 const { $1: imageName, $2: pseudoClass } = RegExp;
                 (pseudoMap[imageName] || (pseudoMap[imageName] = {}))[pseudoClass] = image;
-            } else {
-                selectors.push(image);
             }
+            selectors.push(image);
         });
 
         return { selectors, pseudoMap };
