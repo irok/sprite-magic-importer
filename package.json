@@ -6,34 +6,24 @@
   "bugs": {
     "url": "https://github.com/irok/sprite-magic-importer/issues"
   },
-  "config": {
-    "pre-git": {
-      "pre-commit": [
-        "yarn run build"
-      ],
-      "pre-push": [
-        "yarn run lint"
-      ]
-    }
-  },
   "dependencies": {
-    "del": "^2.2.2",
-    "fs-extra": "^1.0.0",
-    "glob": "^7.1.1",
-    "imagemin": "^5.2.2",
-    "imagemin-pngquant": "^5.0.0",
-    "spritesmith": "^3.1.0"
+    "del": "^5.0.0",
+    "fs-extra": "^8.1.0",
+    "glob": "^7.1.4",
+    "imagemin": "^7.0.0",
+    "imagemin-pngquant": "^8.0.0",
+    "spritesmith": "^3.3.1"
   },
   "devDependencies": {
-    "babel-preset-latest": "^6.22.0",
-    "eslint": "^3.13.1",
-    "eslint-config-airbnb-base": "^11.0.1",
-    "eslint-plugin-import": "^2.2.0",
-    "node-sass": "^4.3.0",
-    "pre-git": "^3.12.0",
-    "rollup": "^0.41.4",
-    "rollup-plugin-babel": "^2.7.1",
-    "rollup-plugin-json": "^2.1.0"
+    "@babel/core": "^7.5.4",
+    "@babel/preset-env": "^7.5.4",
+    "eslint": "^6.0.1",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-import": "^2.18.0",
+    "node-sass": "^4.12.0",
+    "rollup": "^1.17.0",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-json": "^4.0.0"
   },
   "homepage": "https://github.com/irok/sprite-magic-importer#readme",
   "jsnext:main": "src/index.js",
@@ -54,9 +44,8 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "build:all": "yarn run build && rm -rf example/.cache && yarn run build:example",
+    "build:all": "npm run build && rm -rf example/.cache && npm run build:example",
     "build:example": "node-sass --importer example/importer.js --output-style expanded -o example/htdocs/css/view example/sass/view/app.scss",
-    "commit": "commit-wizard",
     "lint": "eslint --fix src",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
