@@ -100,6 +100,8 @@ module.exports = SpriteMagicImporter({
 
 build.js
 
+**Plese note:** You cannot use `sass.renderSync` with this importer.
+
 ```js
 var sass = require('node-sass');
 var importer = require('./importer');
