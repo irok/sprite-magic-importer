@@ -1,6 +1,17 @@
 # sprite-magic-importer
 Custom node-sass importer for create CSS Sprites like Magic Imports of the Compass.
 
+## Deprecation Notice
+
+CSS Sprites was a performance optimization technique for HTTP/1.1 to reduce the number of HTTP requests. With HTTP/2 and HTTP/3, which support multiplexing, **this technique is generally no longer necessary**.
+
+For new projects, consider using:
+- Individual SVG icons (HTTP/2 handles multiple requests efficiently)
+- SVG sprites using `<symbol>` and `<use>`
+- Inline SVG
+
+This library provides a **`no_sprite` migration mode** to help you transition away from CSS Sprites while keeping your existing SASS code intact. See [Migration Guide](#migration-guide) below.
+
 Input
 
 ```scss
@@ -140,6 +151,8 @@ sass.render({
     * See: https://www.npmjs.com/package/spritesmith#spritesmithrunparams-callback
 * pngquant `object` - This option is passed to the `imagemin-pngquant`.
     * See: https://www.npmjs.com/package/imagemin-pngquant#options
+* no_sprite `boolean` - Set this to true to disable sprite generation. Each icon will reference its individual image file instead of a combined sprite sheet. This is useful for migrating away from CSS Sprites.
+    * default: `false`
 
 ### CLI
 ```bash
@@ -156,6 +169,75 @@ node-sass --importer ./importer.js -o dist/css src/app.scss
     @import "icons/*@2x.png";
     @include all-icons-sprites();
 }
+```
+
+## Migration Guide
+
+If you want to stop using CSS Sprites and remove the dependency on this library, follow these steps:
+
+### Step 1: Enable no_sprite mode
+
+Update your importer configuration:
+
+```js
+var SpriteMagicImporter = require('sprite-magic-importer');
+
+module.exports = SpriteMagicImporter({
+    sass_dir:                   'src/sass',
+    images_dir:                 'src/images',
+    generated_images_dir:       'dist/images',
+    http_stylesheets_path:      '/css',
+    http_generated_images_path: '/images',
+    cache_dir:                  '.cache',  // Use a local cache directory
+    no_sprite: true                        // Enable no_sprite mode
+});
+```
+
+### Step 2: Build your project
+
+Run your build process. Instead of generating a combined sprite image, the importer will generate SASS that references each image file individually.
+
+**Sprite mode output:**
+```css
+.icons-chrome {
+  background-image: url("/images/icons.png");
+  background-position: -32px 0;
+}
+```
+
+**no_sprite mode output:**
+```css
+.icons-chrome {
+  background-image: url("/images/foobar/icons/chrome.png");
+  background-repeat: no-repeat;
+}
+```
+
+### Step 3: Copy generated SASS to your project
+
+Copy the generated `.scss` file from your `cache_dir` into your project's SASS directory.
+
+### Step 4: Remove the @import statement
+
+Replace the magic import with a regular import:
+
+```scss
+// Before
+@import "icons/*.png";
+@include all-icons-sprites(true);
+
+// After
+@import "icons-generated";  // The copied SCSS file
+@include all-icons-sprites(true);
+```
+
+### Step 5: Remove sprite-magic-importer
+
+You can now remove this library from your dependencies and switch to Dart Sass or any other SASS compiler.
+
+```bash
+npm uninstall sprite-magic-importer node-sass
+npm install sass
 ```
 
 ## License

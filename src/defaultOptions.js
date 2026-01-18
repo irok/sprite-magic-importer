@@ -12,7 +12,8 @@ const defaults = {
     use_cache: true,
     cache_dir: path.resolve(os.tmpdir(), 'sprite-magic-importer'),
     spritesmith: {},
-    pngquant: {}
+    pngquant: {},
+    no_sprite: false
 };
 
 export default options => {

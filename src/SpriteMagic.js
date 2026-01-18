@@ -56,6 +56,21 @@ export default class SpriteMagic {
     process(context) {
         this.context = context;
 
+        if (this.options.no_sprite) {
+            return Promise.resolve()
+                .then(() => this.checkPixelRatio())
+                .then(() => this.getImagesInfo())
+                .then(() => this.createHash())
+                .then(() => this.checkCache())
+                .then(() => (this.context.hasCache || Promise.resolve()
+                    .then(() => this.clearCache())
+                    .then(() => this.getImageDimensions())
+                    .then(() => this.createNoSpriteSass())
+                    .then(() => this.outputSassFile())
+                ))
+                .then(() => this.createNoSpriteResult());
+        }
+
         return Promise.resolve()
             .then(() => this.checkPixelRatio())
             .then(() => this.getImagesInfo())
@@ -156,6 +171,19 @@ export default class SpriteMagic {
                     Object.assign(image, sprite.coordinates[image.filePath]);
                 });
             });
+    }
+
+    getImageDimensions() {
+        // Read PNG header to get width and height for each image
+        return Promise.all(this.context.images.map(image =>
+            fs.readFileAsync(image.filePath)
+                .then(buffer => {
+                    // PNG IHDR chunk: width at offset 16, height at offset 20 (big-endian)
+                    const width = buffer.readUInt32BE(16);
+                    const height = buffer.readUInt32BE(20);
+                    Object.assign(image, { x: 0, y: 0, width, height });
+                })
+        ));
     }
 
     outputSpriteImage() {
@@ -315,6 +343,149 @@ export default class SpriteMagic {
         }
 
         return { file: this.spriteSassPath() };
+    }
+
+    createNoSpriteResult() {
+        if (!this.context.hasCache) {
+            console.info(`Create No-Sprite SASS: ${this.context.mapName} (${this.context.images.length} images)`);
+        }
+
+        return { file: this.spriteSassPath() };
+    }
+
+    createNoSpriteSass() {
+        const { selectors, pseudoMap } = this.getSelectorInfo();
+        const { mapName, hash } = this.context;
+        const sass = [];
+
+        // variables (compatible with sprite mode)
+        sass.push(`
+            $sprite-selectors: ${stateClasses.join(', ')} !default;
+            $disable-magic-sprite-selectors: false !default;
+            $default-sprite-separator: '-' !default;
+            $${mapName}-sprite-dimensions: false !default;
+            $${mapName}-class-separator: $default-sprite-separator !default;
+            $${mapName}-sprite-base-class: '.${mapName}#{$${mapName}-class-separator}sprite' !default;
+            $${mapName}-pixel-ratio: ${this.context.pixelRatio};
+            $${mapName}-no-sprite: true;`
+        );
+
+        // sprites data with individual image URLs
+        sass.push(`
+            $${mapName}-sprites: (${
+            selectors.map(image => `
+                ${image.name}: (
+                    url: '${this.individualImageUrl(image)}',
+                    width: ${px(image.width)}, height: ${px(image.height)}${
+                stateClasses.map(state => (
+                    !pseudoMap[image.name] || !pseudoMap[image.name][state] ? '' :
+                    `, ${state}: (
+                        url: '${this.individualImageUrl(pseudoMap[image.name][state])}',
+                        width: ${px(pseudoMap[image.name][state].width)}, height: ${px(pseudoMap[image.name][state].height)}
+                    )`
+                )).join('')}
+                )`
+            ).join(',')}
+            );`
+        );
+
+        // width and height function
+        sass.push(...['width', 'height'].map(prop => `
+            @function ${mapName}-sprite-${prop}($sprite) {
+                @return map-get(map-get($${mapName}-sprites, $sprite), '${prop}') / $${mapName}-pixel-ratio;
+            }`
+        ));
+
+        // dimensions mixin
+        sass.push(`
+            @mixin ${mapName}-sprite-dimensions($sprite) {
+                width: ${mapName}-sprite-width($sprite);
+                height: ${mapName}-sprite-height($sprite);
+            }`
+        );
+
+        // state selector for no-sprite mode
+        sass.push(`
+            @mixin ${mapName}-sprite-selectors(
+                $sprite-name, $full-sprite-name, $offset-x: 0, $offset-y: 0,
+                $unsupported: false, $separator: $${mapName}-class-separator
+            ) {
+                $sprite-data: map-get($${mapName}-sprites, $sprite-name);
+                @each $state in $sprite-selectors {
+                    @if map-has-key($sprite-data, $state) {
+                        $state-data: map-get($sprite-data, $state);
+                        $sprite-class: "#{$full-sprite-name}#{$separator}#{$state}";
+                        &:#{$state}, &.#{$sprite-class} {
+                            background-image: url(map-get($state-data, 'url'));
+                            @if $${mapName}-pixel-ratio != 1 {
+                                background-size: #{map-get($state-data, 'width') / $${mapName}-pixel-ratio} #{map-get($state-data, 'height') / $${mapName}-pixel-ratio};
+                            }
+                        }
+                    }
+                }
+            }`
+        );
+
+        // sprite mixin for no-sprite mode
+        sass.push(`
+            @mixin ${mapName}-sprite(
+                $sprite, $dimensions: $${mapName}-sprite-dimensions, $offset-x: 0, $offset-y: 0, $unsupported: false,
+                $use-magic-selectors: not $disable-magic-sprite-selectors, $separator: $${mapName}-class-separator
+            ) {
+                $sprite-data: map-get($${mapName}-sprites, $sprite);
+                background-image: url(map-get($sprite-data, 'url'));
+                background-repeat: no-repeat;
+                @if $${mapName}-pixel-ratio != 1 {
+                    background-size: #{map-get($sprite-data, 'width') / $${mapName}-pixel-ratio} #{map-get($sprite-data, 'height') / $${mapName}-pixel-ratio};
+                }
+                @if $dimensions {
+                    @include ${mapName}-sprite-dimensions($sprite);
+                }
+                @if $use-magic-selectors {
+                    @include ${mapName}-sprite-selectors(
+                        $sprite, $sprite, $offset-x, $offset-y, $unsupported, $separator
+                    );
+                }
+            }`
+        );
+
+        // all sprites mixin
+        sass.push(`
+            @mixin all-${mapName}-sprites($dimensions: $${mapName}-sprite-dimensions) {
+                #{$${mapName}-sprite-base-class} {
+                    background-repeat: no-repeat;
+                }${
+            selectors.map(image => `
+                .${mapName}-${image.name} {
+                    @include ${mapName}-sprite(${image.name}, $dimensions);
+                }`
+            ).join('')}
+            }`
+        );
+
+        this.context.sass = sass.map(_ => `${_}\n`).join('').replace(/^\x20{12}/mg, '').slice(1);
+    }
+
+    individualImageUrl(image) {
+        const imagePath = path.join(
+            path.dirname(path.normalize(path.join(
+                this.options.http_generated_images_path,
+                this.context.url
+            ))),
+            `${image.basename}.png`
+        );
+
+        // absolute path
+        if (imagePath[0] === path.sep) {
+            return `${this.options.base_uri}${imagePath.replace(/\\/g, '/')}`;
+        }
+
+        // relative path
+        const cssDir = path.dirname(path.normalize(path.join(
+            this.options.http_stylesheets_path,
+            path.relative(this.options.sass_dir, this.rootSassFile)
+        )));
+        return path.relative(cssDir, imagePath).replace(/\\/g, '/');
     }
 
     getSelectorInfo() {
