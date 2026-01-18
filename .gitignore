@@ -1,3 +1,4 @@
 *.log
 *.url
 node_modules
+.cache-no-sprite
