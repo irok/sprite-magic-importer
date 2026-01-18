@@ -1,5 +1,5 @@
 # sprite-magic-importer
-Custom node-sass importer for create CSS Sprites like Magic Imports of the Compass.
+Custom node-sass importer for creating CSS Sprites like Magic Imports of the Compass.
 
 ## Deprecation Notice
 
@@ -12,7 +12,9 @@ For new projects, consider using:
 
 This library provides a **`no_sprite` migration mode** to help you transition away from CSS Sprites while keeping your existing SASS code intact. See [Migration Guide](#migration-guide) below.
 
-Input
+## Example
+
+**Input:**
 
 ```scss
 @import "icons/*.png";
@@ -25,7 +27,7 @@ Input
 }
 ```
 
-Output
+**Output:**
 
 ```css
 .icons-sprite, .icons-chrome, .icons-firefox, .icons-ie, .foo .bar {
@@ -111,7 +113,7 @@ module.exports = SpriteMagicImporter({
 
 build.js
 
-**Plese note:** You cannot use `sass.renderSync` with this importer.
+**Please note:** You cannot use `sass.renderSync` with this importer.
 
 ```js
 var sass = require('node-sass');
